@@ -58,7 +58,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed to run the local ser
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/cake-web-builder.git
+git clone https://github.com/muhammedsaadi99/cake-web-builder.git
 cd cake-web-builder
 ```
 
