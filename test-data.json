@@ -1,0 +1,25 @@
+{
+  "site": {
+    "name": "Acme Widgets Inc.",
+    "tagline": "Designing premium websites with Cake Builder",
+    "logo": "https://picsum.photos/id/20/300/200"
+  },
+  "button": {
+    "label": "Get Started Today",
+    "link": "https://example.com/signup"
+  },
+  "stats": {
+    "customers": "10k+",
+    "satisfaction": "99.8%"
+  },
+  "features": [
+    {
+      "name": "Dynamic Canvas",
+      "description": "Bound items update visually instantly in real-time."
+    },
+    {
+      "name": "Baking Exporter",
+      "description": "Dynamic data is compiled directly to clean, static HTML."
+    }
+  ]
+}

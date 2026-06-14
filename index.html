@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cake Web Builder - Visual Page Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Poppins:wght@400;700&family=Montserrat:wght@400;700&family=Lato:wght@400;700&family=Outfit:wght@400;700&family=Raleway:wght@400;700&family=Nunito:wght@400;700&family=Ubuntu:wght@400;700&family=Quicksand:wght@400;700&family=Fira+Sans:wght@400;700&family=Work+Sans:wght@400;700&family=Cabin:wght@400;700&family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=PT+Serif:wght@400;700&family=Cinzel:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Cardo:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Inconsolata:wght@400;700&family=Roboto+Mono:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Oswald:wght@400;700&family=Anton&family=Lobster&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Permanent+Marker&family=Righteous&family=Abril+Fatface&family=Comfortaa:wght@400;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="cwb-editor-theme">
+  <!-- Top Control Bar -->
+  <header class="cwb-topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <span class="logo-cake">🍰</span>
+        <span class="logo-text">Cake <span class="logo-sub">Builder</span></span>
+      </div>
+      <div class="topbar-divider"></div>
+      <button id="btn-import-json" class="btn-icon" title="Import Project Data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span>Import</span>
+      </button>
+      <button id="btn-export-json" class="btn-icon" title="Save Project Data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span>Save Project</span>
+      </button>
+      <div id="cwb-topbar-left-slot" style="display: inline-flex; gap: 8px;"></div>
+    </div>
+
+    <div class="topbar-center">
+      <!-- Device Viewport Switcher -->
+      <div class="device-switcher">
+        <button id="bp-desktop" class="btn-device active" data-breakpoint="desktop" title="Desktop (Default width)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+        <button id="bp-tablet" class="btn-device" data-breakpoint="tablet" title="Tablet (768px)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </button>
+        <button id="bp-mobile" class="btn-device" data-breakpoint="mobile" title="Mobile (375px)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="19" x2="12.01" y2="19"/></svg>
+        </button>
+      </div>
+      <div class="viewport-size-display">
+        <span id="canvas-width-text">100%</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button id="btn-undo" class="btn-icon" title="Undo (Ctrl+Z)" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button id="btn-redo" class="btn-icon" title="Redo (Ctrl+Y)" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+      </button>
+      <div class="topbar-divider"></div>
+      <button id="btn-preview" class="btn-secondary" title="Preview without editor overlays">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Preview</span>
+      </button>
+      <div id="cwb-topbar-right-slot" style="display: inline-flex; gap: 8px;"></div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="cwb-workspace">
+    <!-- Left Sidebar: Panels -->
+    <aside class="cwb-leftbar">
+      <!-- Tabs header -->
+      <div class="panel-tabs">
+        <button id="tab-add" class="tab-btn active" data-panel="panel-add-elements" title="Add Elements">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button id="tab-layers" class="tab-btn" data-panel="panel-navigator" title="Navigator (Layers Tree)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>
+        </button>
+        <button id="tab-components" class="tab-btn" data-panel="panel-components" title="Components (Layout Presets)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
+        <button id="tab-theme" class="tab-btn" data-panel="panel-theme" title="Global Theme Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" /><circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="11.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="16.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="12" cy="14.5" r="1.5" fill="currentColor"/></svg>
+        </button>
+      </div>
+
+      <!-- Left Panel Contents -->
+      <div class="leftbar-content">
+        <!-- Add Elements Panel -->
+        <section id="panel-add-elements" class="panel-section active">
+          <h3 class="panel-title">Add Elements</h3>
+          <p class="panel-desc">Drag or click to append elements to the current selection.</p>
+          
+          <div class="element-category">
+            <h4 class="category-header">Layout</h4>
+            <div class="element-grid">
+              <button class="add-element-btn" data-tag="section" data-desc="Full-width container for semantic sections">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                <span>Section</span>
+              </button>
+              <button class="add-element-btn" data-tag="div" data-classes="w-container" data-desc="Fixed max-width container">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/></svg>
+                <span>Container</span>
+              </button>
+              <button class="add-element-btn" data-tag="div" data-desc="Generic div block container">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                <span>Div Block</span>
+              </button>
+              <button class="add-element-btn" data-tag="div" data-display="flex" data-desc="Flex container flexbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+                <span>Flexbox</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="element-category">
+            <h4 class="category-header">Basic</h4>
+            <div class="element-grid">
+              <button class="add-element-btn" data-tag="h1" data-text="Heading Title" data-desc="Main header element">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M4 4v16M20 4v16"/></svg>
+                <span>Heading</span>
+              </button>
+              <button class="add-element-btn" data-tag="p" data-text="Paragraph text content. Click double to edit me directly on canvas." data-desc="Standard paragraph block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                <span>Paragraph</span>
+              </button>
+              <button class="add-element-btn" data-tag="span" data-text="Inline text block" data-desc="Inline text wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                <span>Text Block</span>
+              </button>
+              <button class="add-element-btn" data-tag="a" data-text="Link Block text" data-href="#" data-desc="Hyperlink block text wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Link Block</span>
+              </button>
+              <button class="add-element-btn" data-tag="button" data-classes="w-button" data-text="Button label" data-desc="Button visual block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/></svg>
+                <span>Button</span>
+              </button>
+              <button class="add-element-btn" data-tag="img" data-src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80" data-desc="Image visual element">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Image</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="element-category">
+            <h4 class="category-header">Form</h4>
+            <div class="element-grid">
+              <button class="add-element-btn" data-tag="input" data-placeholder="Enter text..." data-desc="Standard input element">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+                <span>Input</span>
+              </button>
+              <button class="add-element-btn" data-tag="textarea" data-placeholder="Enter description..." data-desc="Standard textarea block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
+                <span>Text Area</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigator Tree Panel -->
+        <section id="panel-navigator" class="panel-section">
+          <h3 class="panel-title">Navigator</h3>
+          <p class="panel-desc">Visual page structure hierarchy. Drag elements to reorder.</p>
+          <div id="navigator-tree" class="tree-container">
+            <!-- Dynamic Tree Nodes will render here -->
+          </div>
+        </section>
+
+        <!-- Component Builder Panel -->
+        <section id="panel-components" class="panel-section">
+          <h3 class="panel-title">Component Builder</h3>
+          <p class="panel-desc">Design custom reusable layouts and save them to drag/click onto the canvas.</p>
+          
+          <button id="btn-create-component" class="btn-primary" style="width: 100%; margin-bottom: 20px; display: flex; gap: 8px; justify-content: center; align-items: center;" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Save Selection as Component</span>
+          </button>
+          
+          <div class="element-category">
+            <h4 class="category-header">User Built Components</h4>
+            <div id="user-components-grid" class="component-grid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div class="element-category">
+            <h4 class="category-header">Pre-Built Components</h4>
+            <div id="prebuilt-components-grid" class="component-grid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Global Theme Settings Panel -->
+        <section id="panel-theme" class="panel-section">
+          <h3 class="panel-title">Theme Settings</h3>
+          <p class="panel-desc">Define page-wide colors and fonts. Changes update all linked elements automatically.</p>
+          
+          <div class="element-category">
+            <div class="theme-section-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; margin-bottom: 10px;">
+              <h4 class="category-header" style="margin-bottom: 0; flex: 1; border-bottom: none; padding-bottom: 0; text-transform: uppercase;">Global Colors</h4>
+              <button id="btn-add-global-color" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">+ Add</button>
+            </div>
+            <div id="global-colors-list" class="theme-variables-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="element-category" style="margin-top: 24px;">
+            <div class="theme-section-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; margin-bottom: 10px;">
+              <h4 class="category-header" style="margin-bottom: 0; flex: 1; border-bottom: none; padding-bottom: 0; text-transform: uppercase;">Global Fonts</h4>
+              <button id="btn-add-global-font" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">+ Add</button>
+            </div>
+            <div id="global-fonts-list" class="theme-variables-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- Center Canvas: Sandboxed Preview -->
+    <div class="cwb-canvas-container">
+      <div class="canvas-header-bar">
+        <span class="indicator-tag" id="active-tag-indicator">None selected</span>
+        <div class="canvas-size-ruler">
+          <span class="ruler-line"></span>
+          <span id="canvas-pixel-width">100%</span>
+          <span class="ruler-line"></span>
+        </div>
+      </div>
+      <div class="canvas-viewport" id="canvas-viewport-wrapper">
+        <iframe id="canvas-iframe" src="about:blank"></iframe>
+        <!-- Resize Handles -->
+        <div class="canvas-resize-handle handle-right" id="handle-resize-right"></div>
+        <div class="canvas-resize-handle handle-left" id="handle-resize-left"></div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Properties and Styling -->
+    <aside class="cwb-rightbar">
+      <!-- Rightbar panel switcher tabs -->
+      <div class="panel-tabs rightbar-tabs">
+        <button id="tab-styles" class="tab-btn active" data-tab-target="panel-styles" title="Style Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM11.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM16.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M6 15c0 1.06.42 2.08 1.17 2.83S8.94 19 10 19h4c1.06 0 2.08-.42 2.83-1.17S18 16.06 18 15c0-1.06-.42-2.08-1.17-2.83S15.06 11 14 11h-4c-2.21 0-4 1.79-4 4z"/></svg>
+          <span>Style</span>
+        </button>
+        <button id="tab-settings" class="tab-btn" data-tab-target="panel-settings" title="Element Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+        <button id="tab-animation" class="tab-btn" data-tab-target="panel-animation" title="Animation Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Animation</span>
+        </button>
+        <div id="cwb-rightbar-tabs-slot" style="display: inline-flex; gap: 4px;"></div>
+      </div>
+
+      <!-- PANEL 1: STYLES -->
+      <div id="panel-styles" class="rightbar-tab-panel">
+        <!-- Selectors / Class Manager -->
+        <section class="properties-section class-manager-section">
+          <h4 class="properties-section-title">Selector</h4>
+          <div class="class-selector-wrapper">
+            <div class="class-input-container">
+              <span class="selector-hashtag">#</span>
+              <input type="text" id="class-input" placeholder="Select or add a class..." autocomplete="off">
+              <span id="class-mode-badge" class="mode-badge inline-mode" title="Editing element style override. Add a class to style globally.">Element</span>
+            </div>
+            <div id="class-chips-list" class="class-chips-list"></div>
+            <div id="state-chips-list" class="class-chips-list" style="margin-top: 6px;"></div>
+
+            <!-- Pseudo-State Modifier Selector -->
+            <div class="property-field" style="margin-top: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
+                <label style="font-size: 11px; color: var(--text-muted); margin: 0; white-space: nowrap;">State modifier</label>
+                <select id="style-state-select" style="width: 120px; height: 24px; font-size: 11px; padding: 0 20px 0 6px; margin: 0;">
+                  <option value="normal">None (Normal)</option>
+                  <option value="hover">:hover (Hover)</option>
+                  <option value="active">:active (Click)</option>
+                  <option value="focus">:focus (Focus)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Layout / Flex/Grid properties -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Layout</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="property-row">
+              <label>Display</label>
+              <div class="btn-group display-toggle">
+                <button data-prop="display" data-val="block" class="btn-choice" title="Block">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </button>
+                <button data-prop="display" data-val="flex" class="btn-choice" title="Flex">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                </button>
+                <button data-prop="display" data-val="grid" class="btn-choice" title="Grid">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                </button>
+                <button data-prop="display" data-val="inline-block" class="btn-choice" title="Inline Block">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="1"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                </button>
+                <button data-prop="display" data-val="none" class="btn-choice" title="Hide (Display None)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Flex Options -->
+            <div id="flex-options-container" class="layout-sub-options hidden">
+              <div class="property-row">
+                <label>Direction</label>
+                <div class="btn-group">
+                  <button data-prop="flex-direction" data-val="row" class="btn-choice" title="Row">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                  <button data-prop="flex-direction" data-val="column" class="btn-choice" title="Column">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                  </button>
+                  <button data-prop="flex-direction" data-val="row-reverse" class="btn-choice" title="Row Reverse">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                  </button>
+                  <button data-prop="flex-direction" data-val="column-reverse" class="btn-choice" title="Column Reverse">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="property-row">
+                <label>Align Items</label>
+                <div class="btn-group">
+                  <button data-prop="align-items" data-val="stretch" class="btn-choice" title="Stretch">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="2" x2="20" y2="2"/><line x1="4" y1="22" x2="20" y2="22"/><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                  </button>
+                  <button data-prop="align-items" data-val="flex-start" class="btn-choice" title="Start">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="2" x2="20" y2="2"/><rect x="6" y="5" width="4" height="8" rx="1"/><rect x="14" y="5" width="4" height="12" rx="1"/></svg>
+                  </button>
+                  <button data-prop="align-items" data-val="center" class="btn-choice" title="Center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><rect x="6" y="6" width="4" height="12" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></svg>
+                  </button>
+                  <button data-prop="align-items" data-val="flex-end" class="btn-choice" title="End">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="22" x2="20" y2="22"/><rect x="6" y="11" width="4" height="8" rx="1"/><rect x="14" y="7" width="4" height="12" rx="1"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="property-row">
+                <label>Justify</label>
+                <div class="btn-group">
+                  <button data-prop="justify-content" data-val="flex-start" class="btn-choice" title="Start">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="4" x2="2" y2="20"/><rect x="5" y="6" width="8" height="4" rx="1"/><rect x="5" y="14" width="12" height="4" rx="1"/></svg>
+                  </button>
+                  <button data-prop="justify-content" data-val="center" class="btn-choice" title="Center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><rect x="8" y="5" width="8" height="4" rx="1"/><rect x="6" y="15" width="12" height="4" rx="1"/></svg>
+                  </button>
+                  <button data-prop="justify-content" data-val="flex-end" class="btn-choice" title="End">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="4" x2="22" y2="20"/><rect x="11" y="6" width="8" height="4" rx="1"/><rect x="7" y="14" width="12" height="4" rx="1"/></svg>
+                  </button>
+                  <button data-prop="justify-content" data-val="space-between" class="btn-choice" title="Space Between">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="4" x2="2" y2="20"/><line x1="22" y1="4" x2="22" y2="20"/><rect x="5" y="6" width="4" height="12" rx="1"/><rect x="15" y="6" width="4" height="12" rx="1"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="property-row">
+                <label>Wrap</label>
+                <div class="btn-group">
+                  <button data-prop="flex-wrap" data-val="nowrap" class="btn-choice" title="No Wrap">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="6" rx="1"/><rect x="17" y="9" width="4" height="6" rx="1"/></svg>
+                  </button>
+                  <button data-prop="flex-wrap" data-val="wrap" class="btn-choice" title="Wrap">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="4" height="6" rx="1"/><rect x="10" y="4" width="4" height="6" rx="1"/><rect x="3" y="14" width="4" height="6" rx="1"/><path d="M16 14h4a2 2 0 0 1 2 2v2" stroke-dasharray="2 2"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="property-grid-2">
+                <div class="property-field">
+                  <label>Row Gap</label>
+                  <div class="input-group">
+                    <input type="text" data-prop="row-gap" placeholder="0" autocomplete="off">
+                    <select class="unit-select" data-unit-for="row-gap">
+                      <option value="px">px</option>
+                      <option value="rem">rem</option>
+                      <option value="em">em</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="property-field">
+                  <label>Col Gap</label>
+                  <div class="input-group">
+                    <input type="text" data-prop="column-gap" placeholder="0" autocomplete="off">
+                    <select class="unit-select" data-unit-for="column-gap">
+                      <option value="px">px</option>
+                      <option value="rem">rem</option>
+                      <option value="em">em</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid Options -->
+            <div id="grid-options-container" class="layout-sub-options hidden">
+              <div class="property-grid-2">
+                <div class="property-field">
+                  <label>Columns (e.g. 1fr 1fr)</label>
+                  <input type="text" data-prop="grid-template-columns" placeholder="1fr 1fr" autocomplete="off">
+                </div>
+                <div class="property-field">
+                  <label>Rows (e.g. auto)</label>
+                  <input type="text" data-prop="grid-template-rows" placeholder="auto" autocomplete="off">
+                </div>
+              </div>
+              <div class="property-grid-2">
+                <div class="property-field">
+                  <label>Row Gap</label>
+                  <div class="input-group">
+                    <input type="text" data-prop="row-gap" placeholder="10" autocomplete="off">
+                    <select class="unit-select" data-unit-for="row-gap">
+                      <option value="px">px</option>
+                      <option value="rem">rem</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="property-field">
+                  <label>Col Gap</label>
+                  <div class="input-group">
+                    <input type="text" data-prop="column-gap" placeholder="10" autocomplete="off">
+                    <select class="unit-select" data-unit-for="column-gap">
+                      <option value="px">px</option>
+                      <option value="rem">rem</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Spacing: Margins and Paddings -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Spacing</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="spacing-box-wrapper">
+              <div class="spacing-box margin-box">
+                <span class="box-label">MARGIN</span>
+                <input type="text" data-spacing-prop="margin-top" class="spacing-input margin-top" placeholder="0" title="Margin Top">
+                <input type="text" data-spacing-prop="margin-right" class="spacing-input margin-right" placeholder="0" title="Margin Right">
+                <input type="text" data-spacing-prop="margin-bottom" class="spacing-input margin-bottom" placeholder="0" title="Margin Bottom">
+                <input type="text" data-spacing-prop="margin-left" class="spacing-input margin-left" placeholder="0" title="Margin Left">
+
+                <div class="spacing-box padding-box">
+                  <span class="box-label">PADDING</span>
+                  <input type="text" data-spacing-prop="padding-top" class="spacing-input padding-top" placeholder="0" title="Padding Top">
+                  <input type="text" data-spacing-prop="padding-right" class="spacing-input padding-right" placeholder="0" title="Padding Right">
+                  <input type="text" data-spacing-prop="padding-bottom" class="spacing-input padding-bottom" placeholder="0" title="Padding Bottom">
+                  <input type="text" data-spacing-prop="padding-left" class="spacing-input padding-left" placeholder="0" title="Padding Left">
+                  <div class="box-element-core"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Size properties -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Size</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Width</label>
+                <div class="input-group">
+                  <input type="text" data-prop="width" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="width">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="em">em</option>
+                    <option value="vw">vw</option>
+                    <option value="vh">vh</option>
+                    <option value="auto">auto</option>
+                    <option value="fit-content">fit</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Height</label>
+                <div class="input-group">
+                  <input type="text" data-prop="height" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="height">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="em">em</option>
+                    <option value="vh">vh</option>
+                    <option value="vw">vw</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Min W</label>
+                <div class="input-group">
+                  <input type="text" data-prop="min-width" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="min-width">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="vw">vw</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Min H</label>
+                <div class="input-group">
+                  <input type="text" data-prop="min-height" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="min-height">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="vh">vh</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Max W</label>
+                <div class="input-group">
+                  <input type="text" data-prop="max-width" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="max-width">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="vw">vw</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Max H</label>
+                <div class="input-group">
+                  <input type="text" data-prop="max-height" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="max-height">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="vh">vh</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Typography</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="property-field">
+              <label>Font Family</label>
+              <select data-prop="font-family">
+                <option value="">Default (Inherit)</option>
+                <option value="system-ui, -apple-system, sans-serif" style="font-family: system-ui, -apple-system, sans-serif;">System Sans-serif</option>
+                <option value="Georgia, serif" style="font-family: Georgia, serif;">System Serif (Georgia)</option>
+                <optgroup label="Sans-Serif (Google Fonts)">
+                  <option value="'Inter', sans-serif" style="font-family: 'Inter', sans-serif;">Inter</option>
+                  <option value="'Roboto', sans-serif" style="font-family: 'Roboto', sans-serif;">Roboto</option>
+                  <option value="'Open Sans', sans-serif" style="font-family: 'Open Sans', sans-serif;">Open Sans</option>
+                  <option value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif;">Poppins</option>
+                  <option value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+                  <option value="'Lato', sans-serif" style="font-family: 'Lato', sans-serif;">Lato</option>
+                  <option value="'Outfit', sans-serif" style="font-family: 'Outfit', sans-serif;">Outfit</option>
+                  <option value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif;">Raleway</option>
+                  <option value="'Nunito', sans-serif" style="font-family: 'Nunito', sans-serif;">Nunito</option>
+                  <option value="'Ubuntu', sans-serif" style="font-family: 'Ubuntu', sans-serif;">Ubuntu</option>
+                  <option value="'Quicksand', sans-serif" style="font-family: 'Quicksand', sans-serif;">Quicksand</option>
+                  <option value="'Fira Sans', sans-serif" style="font-family: 'Fira Sans', sans-serif;">Fira Sans</option>
+                  <option value="'Work Sans', sans-serif" style="font-family: 'Work Sans', sans-serif;">Work Sans</option>
+                  <option value="'Cabin', sans-serif" style="font-family: 'Cabin', sans-serif;">Cabin</option>
+                </optgroup>
+                <optgroup label="Serif (Google Fonts)">
+                  <option value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif;">Playfair Display</option>
+                  <option value="'Merriweather', serif" style="font-family: 'Merriweather', serif;">Merriweather</option>
+                  <option value="'Lora', serif" style="font-family: 'Lora', serif;">Lora</option>
+                  <option value="'PT Serif', serif" style="font-family: 'PT Serif', serif;">PT Serif</option>
+                  <option value="'Cinzel', serif" style="font-family: 'Cinzel', serif;">Cinzel</option>
+                  <option value="'Libre Baskerville', serif" style="font-family: 'Libre Baskerville', serif;">Libre Baskerville</option>
+                  <option value="'Cardo', serif" style="font-family: 'Cardo', serif;">Cardo</option>
+                </optgroup>
+                <optgroup label="Monospace (Google Fonts)">
+                  <option value="'JetBrains Mono', monospace" style="font-family: 'JetBrains Mono', monospace;">JetBrains Mono</option>
+                  <option value="'Fira Code', monospace" style="font-family: 'Fira Code', monospace;">Fira Code</option>
+                  <option value="'Inconsolata', monospace" style="font-family: 'Inconsolata', monospace;">Inconsolata</option>
+                  <option value="'Roboto Mono', monospace" style="font-family: 'Roboto Mono', monospace;">Roboto Mono</option>
+                  <option value="'Source Code Pro', monospace" style="font-family: 'Source Code Pro', monospace;">Source Code Pro</option>
+                </optgroup>
+                <optgroup label="Creative & Display (Google Fonts)">
+                  <option value="'Oswald', sans-serif" style="font-family: 'Oswald', sans-serif;">Oswald</option>
+                  <option value="'Anton', sans-serif" style="font-family: 'Anton', sans-serif;">Anton</option>
+                  <option value="'Lobster', cursive" style="font-family: 'Lobster', cursive;">Lobster</option>
+                  <option value="'Pacifico', cursive" style="font-family: 'Pacifico', cursive;">Pacifico</option>
+                  <option value="'Dancing Script', cursive" style="font-family: 'Dancing Script', cursive;">Dancing Script</option>
+                  <option value="'Caveat', cursive" style="font-family: 'Caveat', cursive;">Caveat</option>
+                  <option value="'Permanent Marker', cursive" style="font-family: 'Permanent Marker', cursive;">Permanent Marker</option>
+                  <option value="'Righteous', cursive" style="font-family: 'Righteous', cursive;">Righteous</option>
+                  <option value="'Abril Fatface', serif" style="font-family: 'Abril Fatface', serif;">Abril Fatface</option>
+                  <option value="'Comfortaa', cursive" style="font-family: 'Comfortaa', cursive;">Comfortaa</option>
+                  <option value="'Orbitron', sans-serif" style="font-family: 'Orbitron', sans-serif;">Orbitron</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Font Size</label>
+                <div class="input-group">
+                  <input type="text" data-prop="font-size" placeholder="16" autocomplete="off">
+                  <select class="unit-select" data-unit-for="font-size">
+                    <option value="px">px</option>
+                    <option value="rem">rem</option>
+                    <option value="em">em</option>
+                    <option value="%">%</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Line Height</label>
+                <input type="text" data-prop="line-height" placeholder="1.4" autocomplete="off">
+              </div>
+            </div>
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Weight</label>
+                <select data-prop="font-weight">
+                  <option value="">Default</option>
+                  <option value="300">Light (300)</option>
+                  <option value="400">Regular (400)</option>
+                  <option value="500">Medium (500)</option>
+                  <option value="600">Semibold (600)</option>
+                  <option value="700">Bold (700)</option>
+                </select>
+              </div>
+              <div class="property-field">
+                <label>Color</label>
+                <div class="color-picker-input">
+                  <input type="color" id="text-color-picker">
+                  <input type="text" data-prop="color" id="text-color-val" placeholder="#ffffff" autocomplete="off">
+                  <button type="button" class="btn-theme-link" data-link-prop="color" title="Link to Global Color">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Letter Spacing</label>
+                <div class="input-group">
+                  <input type="text" data-prop="letter-spacing" placeholder="normal" autocomplete="off">
+                  <select class="unit-select" data-unit-for="letter-spacing">
+                    <option value="px">px</option>
+                    <option value="em">em</option>
+                    <option value="rem">rem</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Font Style</label>
+                <div class="btn-group">
+                  <button data-prop="font-style" data-val="normal" class="btn-choice" title="Normal">Normal</button>
+                  <button data-prop="font-style" data-val="italic" class="btn-choice" title="Italic" style="font-style: italic;">Italic</button>
+                </div>
+              </div>
+            </div>
+            <div class="property-row">
+              <div class="property-field">
+                <label>Align</label>
+                <div class="btn-group text-align-toggle">
+                  <button data-prop="text-align" data-val="left" class="btn-choice" title="Align Left">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                  </button>
+                  <button data-prop="text-align" data-val="center" class="btn-choice" title="Align Center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+                  </button>
+                  <button data-prop="text-align" data-val="right" class="btn-choice" title="Align Right">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+                  </button>
+                  <button data-prop="text-align" data-val="justify" class="btn-choice" title="Justify">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Decoration</label>
+                <div class="btn-group">
+                  <button data-prop="text-decoration" data-val="none" class="btn-choice" title="None">None</button>
+                  <button data-prop="text-decoration" data-val="underline" class="btn-choice" title="Underline" style="text-decoration: underline;">U</button>
+                  <button data-prop="text-decoration" data-val="line-through" class="btn-choice" title="Strikethrough" style="text-decoration: line-through;">S</button>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Transform</label>
+                <div class="btn-group">
+                  <button data-prop="text-transform" data-val="none" class="btn-choice" title="None">None</button>
+                  <button data-prop="text-transform" data-val="uppercase" class="btn-choice" title="Uppercase">TT</button>
+                  <button data-prop="text-transform" data-val="lowercase" class="btn-choice" title="Lowercase">tt</button>
+                  <button data-prop="text-transform" data-val="capitalize" class="btn-choice" title="Capitalize">Tt</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-row" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Vertical Align (sub/super)</label>
+                <div class="btn-group">
+                  <button data-prop="vertical-align" data-val="baseline" class="btn-choice" title="Baseline (Normal)">Normal</button>
+                  <button data-prop="vertical-align" data-val="super" class="btn-choice" title="Superscript">x²</button>
+                  <button data-prop="vertical-align" data-val="sub" class="btn-choice" title="Subscript">x₂</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Backgrounds -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Background</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="property-field">
+              <label>Background Color</label>
+              <div class="color-picker-input">
+                <input type="color" id="bg-color-picker">
+                <input type="text" data-prop="background-color" id="bg-color-val" placeholder="transparent" autocomplete="off">
+                <button type="button" class="btn-theme-link" data-link-prop="background-color" title="Link to Global Color">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="property-field" style="margin-top: 10px;">
+              <label>Background Image</label>
+              <div class="image-selector-widget" data-image-target="background">
+                <div class="image-selector-tabs">
+                  <button type="button" class="img-tab-btn active" data-tab="url">URL</button>
+                  <button type="button" class="img-tab-btn" data-tab="file">Upload</button>
+                </div>
+                <div class="img-tab-content" id="bg-image-url-content">
+                  <input type="text" id="bg-image-input" placeholder="https://example.com/image.png" autocomplete="off">
+                </div>
+                <div class="img-tab-content hidden" id="bg-image-file-content">
+                  <label class="file-upload-zone" id="bg-file-zone" for="bg-file-input">
+                    <span class="upload-icon">📁</span>
+                    <span class="upload-text">Choose image...</span>
+                  </label>
+                  <input type="file" id="bg-file-input" accept="image/*" style="display:none;">
+                  <div class="uploaded-image-preview hidden" id="bg-file-preview">
+                    <span class="uploaded-filename" id="bg-file-name">image.png</span>
+                    <button type="button" class="btn-remove-uploaded" id="bg-file-remove">×</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Size</label>
+                <select data-prop="background-size">
+                  <option value="">Default</option>
+                  <option value="auto">Auto</option>
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                </select>
+              </div>
+              <div class="property-field">
+                <label>Repeat</label>
+                <select data-prop="background-repeat">
+                  <option value="">Default</option>
+                  <option value="no-repeat">No Repeat</option>
+                  <option value="repeat">Repeat</option>
+                  <option value="repeat-x">Repeat X</option>
+                  <option value="repeat-y">Repeat Y</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Position</label>
+                <select data-prop="background-position">
+                  <option value="">Default</option>
+                  <option value="center center">Center</option>
+                  <option value="top left">Top Left</option>
+                  <option value="top center">Top Center</option>
+                  <option value="top right">Top Right</option>
+                  <option value="bottom left">Bottom Left</option>
+                  <option value="bottom center">Bottom Center</option>
+                  <option value="bottom right">Bottom Right</option>
+                  <option value="center left">Center Left</option>
+                  <option value="center right">Center Right</option>
+                </select>
+              </div>
+              <div class="property-field">
+                <label>Attachment</label>
+                <select data-prop="background-attachment">
+                  <option value="">Default</option>
+                  <option value="scroll">Scroll</option>
+                  <option value="fixed">Fixed</option>
+                  <option value="local">Local</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Borders & Borders Radius -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Borders & Radius</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            
+            <!-- Borders Sub-Section header with toggle -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 500; letter-spacing: 0.05em; margin: 0;">Borders</label>
+              <button id="btn-toggle-border-sides" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Configure sides</button>
+            </div>
+
+            <!-- Global Border Controls (Default) -->
+            <div id="global-border-container">
+              <div class="property-grid-2">
+                <div class="property-field">
+                  <label>Border Style</label>
+                  <select data-prop="border-style">
+                    <option value="">Default (Inherit)</option>
+                    <option value="none">None</option>
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                    <option value="double">Double</option>
+                  </select>
+                </div>
+                <div class="property-field">
+                  <label>Border Width</label>
+                  <div class="input-group">
+                    <input type="text" data-prop="border-width" placeholder="0" autocomplete="off">
+                    <select class="unit-select" data-unit-for="border-width">
+                      <option value="px">px</option>
+                      <option value="em">em</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="property-field" style="margin-top: 8px;">
+                <label>Border Color</label>
+                <div class="color-picker-input">
+                  <input type="color" id="border-color-picker">
+                  <input type="text" data-prop="border-color" id="border-color-val" placeholder="transparent" autocomplete="off">
+                  <button type="button" class="btn-theme-link" data-link-prop="border-color" title="Link to Global Color">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual Border Side Widget (Hidden by default) -->
+            <div id="visual-border-container" class="border-widget-container hidden">
+              <div class="border-side-selector-wrapper">
+                <div class="border-visual-box">
+                  <button class="border-side-btn btn-border-top" data-side="top" title="Border Top"></button>
+                  <button class="border-side-btn btn-border-right" data-side="right" title="Border Right"></button>
+                  <button class="border-side-btn btn-border-bottom" data-side="bottom" title="Border Bottom"></button>
+                  <button class="border-side-btn btn-border-left" data-side="left" title="Border Left"></button>
+                  <button class="border-side-btn btn-border-all active" data-side="all" title="All Borders">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><rect x="3" y="3" width="18" height="18" rx="1"/></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="border-inputs-container">
+                <div class="active-border-label">Configure: <span id="active-border-side-text">All Borders</span></div>
+                <div class="property-grid-2">
+                  <div class="property-field">
+                    <label>Style</label>
+                    <select id="border-style-select">
+                      <option value="">Default (Inherit)</option>
+                      <option value="none">None</option>
+                      <option value="solid">Solid</option>
+                      <option value="dashed">Dashed</option>
+                      <option value="dotted">Dotted</option>
+                      <option value="double">Double</option>
+                    </select>
+                  </div>
+                  <div class="property-field">
+                    <label>Width</label>
+                    <div class="input-group">
+                      <input type="text" id="border-width-input" placeholder="0" autocomplete="off">
+                      <select class="unit-select" id="border-width-unit">
+                        <option value="px">px</option>
+                        <option value="em">em</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="property-field" style="margin-top: 8px;">
+                  <label>Color</label>
+                  <div class="color-picker-input">
+                    <input type="color" id="border-color-picker-widget">
+                    <input type="text" id="border-color-input-widget" placeholder="transparent" autocomplete="off">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Border Radius Widget Section -->
+            <div class="radius-widget-container" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 500; letter-spacing: 0.05em; margin: 0;">Border Radius</label>
+                <button id="btn-toggle-corners" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px; border-radius: 4px;">Configure corners</button>
+              </div>
+              
+              <!-- Global Radius Input (Default) -->
+              <div id="global-radius-container" class="input-group">
+                <input type="text" data-prop="border-radius" placeholder="0" autocomplete="off">
+                <select class="unit-select" data-unit-for="border-radius">
+                  <option value="px">px</option>
+                  <option value="%">%</option>
+                  <option value="rem">rem</option>
+                </select>
+              </div>
+              
+              <!-- Visual Corner Radius Widget (Hidden by default) -->
+              <div id="visual-radius-container" class="border-widget-container hidden">
+                <div class="border-side-selector-wrapper">
+                  <div class="radius-visual-box">
+                    <button class="radius-corner-btn btn-radius-top-left" data-corner="top-left" title="Top Left Corner"></button>
+                    <button class="radius-corner-btn btn-radius-top-right" data-corner="top-right" title="Top Right Corner"></button>
+                    <button class="radius-corner-btn btn-radius-bottom-right" data-corner="bottom-right" title="Bottom Right Corner"></button>
+                    <button class="radius-corner-btn btn-radius-bottom-left" data-corner="bottom-left" title="Bottom Left Corner"></button>
+                    <button class="radius-corner-btn btn-radius-all active" data-corner="all" title="All Corners">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="border-inputs-container">
+                  <div class="active-border-label">Configure: <span id="active-radius-corner-text">All Corners</span></div>
+                  <div class="property-field">
+                    <label>Radius Value</label>
+                    <div class="input-group">
+                      <input type="text" id="radius-value-input" placeholder="0" autocomplete="off">
+                      <select class="unit-select" id="radius-unit-select">
+                        <option value="px">px</option>
+                        <option value="%">%</option>
+                        <option value="rem">rem</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Position Accordion -->
+        <section class="properties-section">
+          <div class="section-accordion-header">
+            <span>Position</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content">
+            <div class="property-field">
+              <label>Position</label>
+              <select data-prop="position">
+                <option value="static">Static (Default)</option>
+                <option value="relative">Relative</option>
+                <option value="absolute">Absolute</option>
+                <option value="fixed">Fixed</option>
+                <option value="sticky">Sticky</option>
+              </select>
+            </div>
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Top</label>
+                <div class="input-group">
+                  <input type="text" data-prop="top" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="top">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Right</label>
+                <div class="input-group">
+                  <input type="text" data-prop="right" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="right">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Bottom</label>
+                <div class="input-group">
+                  <input type="text" data-prop="bottom" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="bottom">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Left</label>
+                <div class="input-group">
+                  <input type="text" data-prop="left" placeholder="auto" autocomplete="off">
+                  <select class="unit-select" data-unit-for="left">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="property-field" style="margin-top: 10px;">
+              <label>Z-Index</label>
+              <input type="text" data-prop="z-index" placeholder="auto" autocomplete="off">
+            </div>
+          </div>
+        </section>
+
+        <!-- Effects Accordion -->
+        <section class="properties-section">
+          <div class="section-accordion-header">
+            <span>Effects</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content">
+            <div class="property-field">
+              <label>Opacity</label>
+              <div class="slider-input-combo">
+                <input type="range" id="opacity-slider" min="0" max="1" step="0.05" value="1">
+                <input type="text" data-prop="opacity" id="opacity-number" placeholder="1.0" class="numeric-input-sm" autocomplete="off">
+              </div>
+            </div>
+            <div class="property-field" style="margin-top: 10px;">
+              <label>Cursor</label>
+              <select data-prop="cursor">
+                <option value="auto">Auto (Default)</option>
+                <option value="default">Default</option>
+                <option value="pointer">Pointer (Hand)</option>
+                <option value="text">Text (I-beam)</option>
+                <option value="move">Move</option>
+                <option value="not-allowed">Not Allowed</option>
+              </select>
+            </div>
+            
+            <!-- Box Shadow composite widgets -->
+            <div class="property-row" style="margin-top: 14px;">
+              <label style="font-size: 11px; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 6px;">Box Shadow</label>
+              <div class="property-grid-2">
+                <div class="property-field">
+                  <label>Blur</label>
+                  <div class="input-group">
+                    <input type="text" id="shadow-blur" placeholder="0" autocomplete="off">
+                    <span style="font-size: 11px; padding: 0 6px; color: var(--text-dark); border-left: 1px solid var(--border-color); height: 100%; display: flex; align-items: center; background: var(--bg-tertiary);">px</span>
+                  </div>
+                </div>
+                <div class="property-field">
+                  <label>Spread</label>
+                  <div class="input-group">
+                    <input type="text" id="shadow-spread" placeholder="0" autocomplete="off">
+                    <span style="font-size: 11px; padding: 0 6px; color: var(--text-dark); border-left: 1px solid var(--border-color); height: 100%; display: flex; align-items: center; background: var(--bg-tertiary);">px</span>
+                  </div>
+                </div>
+              </div>
+              <div class="property-grid-2" style="margin-top: 8px;">
+                <div class="property-field">
+                  <label>Offset X</label>
+                  <div class="input-group">
+                    <input type="text" id="shadow-x" placeholder="0" autocomplete="off">
+                    <span style="font-size: 11px; padding: 0 6px; color: var(--text-dark); border-left: 1px solid var(--border-color); height: 100%; display: flex; align-items: center; background: var(--bg-tertiary);">px</span>
+                  </div>
+                </div>
+                <div class="property-field">
+                  <label>Offset Y</label>
+                  <div class="input-group">
+                    <input type="text" id="shadow-y" placeholder="0" autocomplete="off">
+                    <span style="font-size: 11px; padding: 0 6px; color: var(--text-dark); border-left: 1px solid var(--border-color); height: 100%; display: flex; align-items: center; background: var(--bg-tertiary);">px</span>
+                  </div>
+                </div>
+              </div>
+              <div class="property-field" style="margin-top: 8px;">
+                <label>Shadow Color</label>
+                <div class="color-picker-input">
+                  <input type="color" id="shadow-color-picker">
+                  <input type="text" id="shadow-color-val" placeholder="rgba(0,0,0,0.2)" autocomplete="off">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Transforms & Transitions Accordion -->
+        <section class="properties-section">
+          <div class="section-accordion-header">
+            <span>Transforms & Transitions</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content">
+            <!-- Rotation slider combo -->
+            <div class="property-field">
+              <label>Rotation (deg)</label>
+              <div class="slider-input-combo">
+                <input type="range" id="transform-rotate" min="-180" max="180" step="5" value="0">
+                <input type="text" id="transform-rotate-number" placeholder="0" class="numeric-input-sm" autocomplete="off">
+              </div>
+            </div>
+
+            <!-- Scaling grid -->
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Scale X</label>
+                <input type="number" id="transform-scale-x" min="0.1" max="10" step="0.1" value="1" autocomplete="off">
+              </div>
+              <div class="property-field">
+                <label>Scale Y</label>
+                <input type="number" id="transform-scale-y" min="0.1" max="10" step="0.1" value="1" autocomplete="off">
+              </div>
+            </div>
+
+            <!-- Translation grid -->
+            <div class="property-grid-2" style="margin-top: 10px;">
+              <div class="property-field">
+                <label>Translate X</label>
+                <div class="input-group">
+                  <input type="text" id="transform-translate-x" placeholder="0" autocomplete="off">
+                  <select class="unit-select" id="transform-translate-x-unit">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                  </select>
+                </div>
+              </div>
+              <div class="property-field">
+                <label>Translate Y</label>
+                <div class="input-group">
+                  <input type="text" id="transform-translate-y" placeholder="0" autocomplete="off">
+                  <select class="unit-select" id="transform-translate-y-unit">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transition presets -->
+            <div class="property-row" id="transition-options-container" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <label style="font-size: 11px; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 6px;">Transitions (for Hover / Focus)</label>
+              <div class="property-field">
+                <label>Property</label>
+                <select data-prop="transition-property">
+                  <option value="">None</option>
+                  <option value="all">All Properties</option>
+                  <option value="transform">Transform Only</option>
+                  <option value="opacity">Opacity Only</option>
+                  <option value="background-color, color">Color / Background Only</option>
+                  <option value="opacity, transform">Opacity & Transform</option>
+                </select>
+              </div>
+              <div class="property-grid-2" style="margin-top: 8px;">
+                <div class="property-field">
+                  <label>Duration</label>
+                  <select data-prop="transition-duration">
+                    <option value="">Default (0s)</option>
+                    <option value="0.1s">0.1s</option>
+                    <option value="0.2s">0.2s</option>
+                    <option value="0.3s">0.3s</option>
+                    <option value="0.5s">0.5s</option>
+                    <option value="0.8s">0.8s</option>
+                  </select>
+                </div>
+                <div class="property-field">
+                  <label>Easing</label>
+                  <select data-prop="transition-timing-function">
+                    <option value="">Default</option>
+                    <option value="linear">Linear</option>
+                    <option value="ease">Ease</option>
+                    <option value="ease-in">Ease In</option>
+                    <option value="ease-out">Ease Out</option>
+                    <option value="ease-in-out">Ease In Out</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- PANEL 2: SETTINGS & OPTIONS -->
+      <div id="panel-settings" class="rightbar-tab-panel hidden">
+        <section class="properties-section attributes-section">
+          <div class="section-accordion-header active">
+            <span>Settings & Options</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div id="element-specific-attributes" class="attr-container">
+              <!-- Dynamic attributes like href for a, src for img, placeholder for input -->
+            </div>
+            <div class="topbar-divider" style="margin: 16px 0;"></div>
+            <div class="custom-attr-manager">
+              <h5 style="font-size: 12px; margin-bottom: 8px;">Custom Element Settings</h5>
+              <div class="custom-attr-list" id="custom-attr-list">
+                <!-- Custom attributes list -->
+              </div>
+              <button id="btn-add-custom-attr" class="btn-secondary-sm" style="margin-top: 8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add Custom Setting</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- PANEL 3: ANIMATIONS -->
+      <div id="panel-animation" class="rightbar-tab-panel hidden">
+        <!-- Animations Manager -->
+        <section class="properties-section">
+          <div class="section-accordion-header active">
+            <span>Animations List</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div id="active-animations-list" class="anim-list-container">
+              <!-- Dynamically populated animations list -->
+            </div>
+            <button id="btn-add-animation" class="btn-secondary-sm" style="margin-top: 10px; width: 100%;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Add Animation</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Animation Parameters Details -->
+        <section id="anim-details-section" class="properties-section hidden">
+          <div class="section-accordion-header active">
+            <span>Animation Settings</span>
+            <svg class="accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-accordion-content active">
+            <div class="property-row">
+              <div class="property-field">
+                <label>Trigger</label>
+                <select id="anim-trigger-select">
+                  <option value="load">On Load (Immediate)</option>
+                  <option value="hover">On Hover (Mouse Enter)</option>
+                  <option value="active">On Click (Mouse Press)</option>
+                </select>
+              </div>
+            </div>
+            <div class="property-row">
+              <div class="property-field">
+                <label>Effect Type</label>
+                <select id="anim-type-select">
+                  <option value="fade-in">Fade In</option>
+                  <option value="fade-out">Fade Out</option>
+                  <option value="slide-up">Slide Up</option>
+                  <option value="slide-down">Slide Down</option>
+                  <option value="slide-left">Slide Left</option>
+                  <option value="slide-right">Slide Right</option>
+                  <option value="zoom-in">Zoom In</option>
+                  <option value="zoom-out">Zoom Out</option>
+                  <option value="spin">Spin</option>
+                  <option value="bounce">Bounce</option>
+                  <option value="pulse">Pulse Glow</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Duration & Delay inputs with slider + numeric value -->
+            <div class="property-row">
+              <label>Duration (seconds)</label>
+              <div class="slider-input-combo">
+                <input type="range" id="anim-duration-slider" min="0.1" max="5.0" step="0.1" value="1.0">
+                <input type="number" id="anim-duration-number" min="0.1" max="10.0" step="0.1" value="1.0" class="numeric-input-sm">
+              </div>
+            </div>
+            <div class="property-row">
+              <label>Delay (seconds)</label>
+              <div class="slider-input-combo">
+                <input type="range" id="anim-delay-slider" min="0" max="5.0" step="0.1" value="0">
+                <input type="number" id="anim-delay-number" min="0" max="10.0" step="0.1" value="0" class="numeric-input-sm">
+              </div>
+            </div>
+
+            <div class="property-grid-2">
+              <div class="property-field">
+                <label>Iteration</label>
+                <select id="anim-iteration-select">
+                  <option value="1">1 time</option>
+                  <option value="2">2 times</option>
+                  <option value="3">3 times</option>
+                  <option value="infinite">Infinite (Loop)</option>
+                </select>
+              </div>
+              <div class="property-field">
+                <label>Direction</label>
+                <select id="anim-direction-select">
+                  <option value="normal">Normal</option>
+                  <option value="reverse">Reverse</option>
+                  <option value="alternate">Alternate</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Easing / cubic-bezier curve visual graph widget -->
+            <div class="property-row" style="margin-top: 15px;">
+              <div class="property-field">
+                <label>Easing Function</label>
+                <select id="anim-easing-select">
+                  <option value="ease">Ease (Default)</option>
+                  <option value="linear">Linear</option>
+                  <option value="ease-in">Ease In</option>
+                  <option value="ease-out">Ease Out</option>
+                  <option value="ease-in-out">Ease In Out</option>
+                  <option value="custom">Custom Bezier Curve</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Custom Bezier Graph Wrapper (visible only when easing is custom) -->
+            <div id="bezier-graph-wrapper" class="bezier-graph-wrapper hidden">
+              <div class="bezier-svg-container">
+                <svg id="bezier-graph-svg" width="100%" height="130" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <!-- Grid backdrop lines -->
+                  <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1"></line>
+                  
+                  <line x1="0" y1="0" x2="0" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1"></line>
+                  <line x1="25" y1="0" x2="25" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="75" y1="0" x2="75" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+                  <line x1="100" y1="0" x2="100" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"></line>
+
+                  <!-- Linear baseline reference -->
+                  <line x1="0" y1="100" x2="100" y2="0" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" stroke-dasharray="1 3"></line>
+
+                  <!-- Guidelines -->
+                  <line id="bezier-guide1" x1="0" y1="100" x2="25" y2="75" stroke="rgba(99, 91, 255, 0.4)" stroke-width="1" stroke-dasharray="1 1"></line>
+                  <line id="bezier-guide2" x1="100" y1="0" x2="75" y2="25" stroke="rgba(255, 170, 51, 0.4)" stroke-width="1" stroke-dasharray="1 1"></line>
+                  
+                  <!-- Cubic Bezier Curve path -->
+                  <path id="bezier-curve-path" d="M 0 100 C 25 75, 75 25, 100 0" fill="none" stroke="#635bff" stroke-width="2.5"></path>
+                  
+                  <!-- Interactive Handles circles -->
+                  <circle id="bezier-handle1" cx="25" cy="75" r="4.5" fill="#3898EC" stroke="#fff" stroke-width="1" cursor="pointer"></circle>
+                  <circle id="bezier-handle2" cx="75" cy="25" r="4.5" fill="#ffaa33" stroke="#fff" stroke-width="1" cursor="pointer"></circle>
+                </svg>
+              </div>
+              <div class="bezier-values" id="bezier-values-text">cubic-bezier(0.25, 0.25, 0.75, 0.75)</div>
+            </div>
+
+            <!-- Timeline Visual representation -->
+            <div class="property-row" style="margin-top: 20px;">
+              <label>Timeline preview (5s scale)</label>
+              <div class="timeline-visualizer">
+                <div class="timeline-ticks">
+                  <span>0s</span>
+                  <span>1s</span>
+                  <span>2s</span>
+                  <span>3s</span>
+                  <span>4s</span>
+                  <span>5s</span>
+                </div>
+                <div class="timeline-track">
+                  <div id="timeline-delay-bar" class="timeline-bar delay-bar" style="width: 0%;"></div>
+                  <div id="timeline-duration-bar" class="timeline-bar duration-bar" style="width: 20%;"></div>
+                </div>
+                <div class="timeline-summary" id="timeline-summary-text">Delay: 0.0s | Duration: 1.0s</div>
+              </div>
+            </div>
+
+            <!-- Preview trigger -->
+            <button id="btn-preview-animation" class="btn-primary" style="margin-top: 15px; width: 100%; display: flex; gap: 8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Play Preview</span>
+            </button>
+          </div>
+        </section>
+      </div>
+      <div id="cwb-rightbar-panels-slot"></div>
+    </aside>
+  </main>
+
+  <!-- Modal for JSON import/export -->
+  <div id="modal-json" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h4 id="modal-json-title">Import Project Data</h4>
+        <button id="btn-modal-close" class="btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-json-desc">Paste the project text code data of your document below:</p>
+        <textarea id="json-textarea" placeholder="Paste your Cake Project Data here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-modal-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-modal-submit" class="btn-primary">Apply Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Component Naming -->
+  <div id="modal-component" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header">
+        <h4 id="modal-component-title">Save Selection as Component</h4>
+        <button id="btn-modal-comp-close" class="btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-component-desc" style="font-size: 12px; margin-bottom: 15px; color: var(--text-muted);">Enter a name to save this element and its descendants as a reusable component:</p>
+        <div class="property-field" style="margin-bottom: 10px;">
+          <label style="display: block; font-size: 11px; margin-bottom: 4px; font-weight: 500; color: var(--text-muted); text-transform: uppercase;">Component Name</label>
+          <input type="text" id="component-name-input" placeholder="e.g., Testimonial Card" autocomplete="off" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-main); outline: none;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-modal-comp-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-modal-comp-submit" class="btn-primary">Save Component</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main script hook -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

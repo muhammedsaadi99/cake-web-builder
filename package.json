@@ -1,0 +1,14 @@
+{
+  "name": "cake-web-builder",
+  "version": "1.0.0",
+  "description": "Visual JSON-Driven Web Page Designer",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server ./ -p 3000 -c-1",
+    "start": "npx http-server ./ -p 3000 -c-1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
