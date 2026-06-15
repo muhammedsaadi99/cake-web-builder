@@ -959,4 +959,6 @@ export class AttributesPanelController {
     });
     idField.appendChild(idInp);
     this.specificContainer.appendChild(idField);
+  }
 }
+
