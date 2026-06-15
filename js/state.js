@@ -439,6 +439,24 @@ class StateManager {
       if (node && this.activeClass && !node.classes.includes(this.activeClass)) {
         this.activeClass = null;
       }
+      
+      // Rotate slider if slide or child of slide is selected
+      let current = node;
+      while (current && current.id !== 'root') {
+        if (current.classes && current.classes.includes('cwb-slide')) {
+          const slideNode = current;
+          const parentSlider = this.findParent(slideNode.id);
+          if (parentSlider && parentSlider.classes && parentSlider.classes.includes('cwb-slider')) {
+            const slides = parentSlider.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+            const slideIdx = slides.indexOf(slideNode);
+            if (slideIdx !== -1) {
+              parentSlider.attributes['data-active-index'] = slideIdx.toString();
+            }
+          }
+          break;
+        }
+        current = this.findParent(current.id);
+      }
     } else {
       this.activeClass = null;
     }

@@ -75,6 +75,11 @@ export class AttributesPanelController {
       return;
     }
 
+    if (node.classes && node.classes.includes('cwb-slide')) {
+      this.renderSlideSettings(node);
+      return;
+    }
+
     const createField = (labelName, keyName, placeholderText = "") => {
       const field = document.createElement('div');
       field.className = 'property-field';
@@ -448,16 +453,17 @@ export class AttributesPanelController {
         ]
       };
       node.children.push(newSlide);
-      this.expandedSlideIndex = node.children.length - 1;
-      state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+      const newIndex = node.children.filter(c => c.classes && c.classes.includes('cwb-slide')).length - 1;
+      state.updateAttribute('data-active-index', newIndex.toString());
       state.saveHistory();
-      this.render();
+      // Select the new slide node automatically to edit it
+      state.selectNode(newSlide.id);
     });
     
     slidesTitle.appendChild(btnAddSlide);
     this.specificContainer.appendChild(slidesTitle);
 
-    // --- Slide Items Accordion List ---
+    // --- Slide Items List ---
     const slidesList = document.createElement('div');
     slidesList.className = 'slider-items-list';
     slidesList.style.display = 'flex';
@@ -467,13 +473,9 @@ export class AttributesPanelController {
 
     slides.forEach((slide, i) => {
       const titleNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-title'));
-      const descNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-desc'));
-      const buttonNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-button'));
-
-      const isExpanded = this.expandedSlideIndex === i;
 
       const itemCard = document.createElement('div');
-      itemCard.className = `slider-item-card ${isExpanded ? 'expanded' : ''}`;
+      itemCard.className = `slider-item-card`;
       itemCard.style.border = '1px solid var(--border-color)';
       itemCard.style.borderRadius = '6px';
       itemCard.style.backgroundColor = 'var(--bg-secondary)';
@@ -488,7 +490,6 @@ export class AttributesPanelController {
       header.style.justifyContent = 'space-between';
       header.style.cursor = 'pointer';
       header.style.backgroundColor = 'var(--bg-tertiary)';
-      header.style.borderBottom = isExpanded ? '1px solid var(--border-color)' : 'none';
 
       // Title & Arrow
       const titleWrap = document.createElement('div');
@@ -497,7 +498,7 @@ export class AttributesPanelController {
       titleWrap.style.gap = '8px';
       
       const arrow = document.createElement('span');
-      arrow.innerHTML = isExpanded ? '▼' : '▶';
+      arrow.innerHTML = '▶';
       arrow.style.fontSize = '9px';
       arrow.style.color = 'var(--text-muted)';
       
@@ -536,8 +537,7 @@ export class AttributesPanelController {
           const temp = node.children[idx];
           node.children[idx] = node.children[prevIdx];
           node.children[prevIdx] = temp;
-          this.expandedSlideIndex = i - 1;
-          state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+          state.updateAttribute('data-active-index', (i - 1).toString());
           state.saveHistory();
           this.render();
         }
@@ -563,8 +563,7 @@ export class AttributesPanelController {
           const temp = node.children[idx];
           node.children[idx] = node.children[nextIdx];
           node.children[nextIdx] = temp;
-          this.expandedSlideIndex = i + 1;
-          state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+          state.updateAttribute('data-active-index', (i + 1).toString());
           state.saveHistory();
           this.render();
         }
@@ -584,8 +583,7 @@ export class AttributesPanelController {
         });
         const idx = node.children.indexOf(slide);
         node.children.splice(idx + 1, 0, cloned);
-        this.expandedSlideIndex = i + 1;
-        state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+        state.updateAttribute('data-active-index', (i + 1).toString());
         state.saveHistory();
         this.render();
       });
@@ -608,7 +606,6 @@ export class AttributesPanelController {
         if (newActive >= slides.length - 1) {
           newActive = Math.max(0, slides.length - 2);
         }
-        this.expandedSlideIndex = -1;
         state.updateAttribute('data-active-index', newActive.toString());
         state.saveHistory();
         this.render();
@@ -621,183 +618,10 @@ export class AttributesPanelController {
       header.appendChild(actions);
 
       header.addEventListener('click', () => {
-        this.expandedSlideIndex = isExpanded ? -1 : i;
-        state.updateAttribute('data-active-index', i.toString());
-        this.render();
+        state.selectNode(slide.id);
       });
 
       itemCard.appendChild(header);
-
-      if (isExpanded) {
-        const body = document.createElement('div');
-        body.className = 'slider-item-body';
-        body.style.padding = '12px';
-        body.style.display = 'flex';
-        body.style.flexDirection = 'column';
-        body.style.gap = '10px';
-
-        // 1. Heading Content
-        if (titleNode) {
-          const field = document.createElement('div');
-          field.className = 'property-field';
-          field.innerHTML = `<label>Heading Text</label>`;
-          const inp = document.createElement('input');
-          inp.type = 'text';
-          inp.value = titleNode.textContent || '';
-          inp.addEventListener('change', () => {
-            state.updateTextContent(titleNode.id, inp.value.trim());
-          });
-          field.appendChild(inp);
-          body.appendChild(field);
-        }
-
-        // 2. Description Content
-        if (descNode) {
-          const field = document.createElement('div');
-          field.className = 'property-field';
-          field.innerHTML = `<label>Description Text</label>`;
-          const ta = document.createElement('textarea');
-          ta.style.height = '50px';
-          ta.value = descNode.textContent || '';
-          ta.addEventListener('change', () => {
-            state.updateTextContent(descNode.id, ta.value.trim());
-          });
-          field.appendChild(ta);
-          body.appendChild(field);
-        }
-
-        // 3. Button Label
-        if (buttonNode) {
-          const field = document.createElement('div');
-          field.className = 'property-field';
-          field.innerHTML = `<label>Button Text</label>`;
-          const inp = document.createElement('input');
-          inp.type = 'text';
-          inp.value = buttonNode.textContent || '';
-          inp.addEventListener('change', () => {
-            state.updateTextContent(buttonNode.id, inp.value.trim());
-          });
-          field.appendChild(inp);
-          body.appendChild(field);
-
-          // Button URL
-          const linkField = document.createElement('div');
-          linkField.className = 'property-field';
-          linkField.innerHTML = `<label>Button Link URL</label>`;
-          const urlInp = document.createElement('input');
-          urlInp.type = 'text';
-          urlInp.value = buttonNode.attributes.href || '';
-          urlInp.addEventListener('change', () => {
-            state.updateNodeAttribute(buttonNode.id, 'href', urlInp.value.trim());
-          });
-          linkField.appendChild(urlInp);
-          body.appendChild(linkField);
-        }
-
-        // 4. Slide Background Color
-        const bgColorField = document.createElement('div');
-        bgColorField.className = 'property-field';
-        bgColorField.innerHTML = `<label>Background Color</label>`;
-        const bgInp = document.createElement('input');
-        bgInp.type = 'text';
-        bgInp.placeholder = '#ffffff';
-        bgInp.value = slide.styles.desktop['background-color'] || '';
-        bgInp.addEventListener('change', () => {
-          state.updateNodeStyle(slide.id, 'background-color', bgInp.value.trim());
-        });
-        bgColorField.appendChild(bgInp);
-        body.appendChild(bgColorField);
-
-        // 5. Slide Background Image
-        const bgImgField = document.createElement('div');
-        bgImgField.className = 'property-field';
-        bgImgField.innerHTML = `<label>Background Image</label>`;
-
-        const bgVal = slide.styles.desktop['background-image'] || '';
-        let bgUrlVal = '';
-        if (bgVal.startsWith('url(')) {
-          bgUrlVal = bgVal.replace(/url\(['"]?([^'"]+)['"]?\)/gi, '$1');
-        }
-
-        const selectorWrapper = document.createElement('div');
-        selectorWrapper.className = 'image-selector-widget';
-        
-        const activeTab = this.slideBgTabs[slide.id] || 'url';
-        const isUrlActive = (activeTab === 'url');
-
-        selectorWrapper.innerHTML = `
-          <div class="image-selector-tabs">
-            <button type="button" class="img-tab-btn ${isUrlActive ? 'active' : ''}" data-tab="url">URL</button>
-            <button type="button" class="img-tab-btn ${!isUrlActive ? 'active' : ''}" data-tab="file">Upload</button>
-          </div>
-          <div class="img-tab-content ${isUrlActive ? '' : 'hidden'}" id="bg-url-content">
-            <input type="text" id="bg-src-url" placeholder="https://example.com/bg.png" autocomplete="off" style="width:100%; margin-top:6px;">
-          </div>
-          <div class="img-tab-content ${!isUrlActive ? '' : 'hidden'}" id="bg-file-content">
-            <label class="file-upload-zone" id="bg-file-zone" for="bg-file-input-${slide.id}" style="margin-top:6px; display:flex;">
-              <span class="upload-icon">📁</span>
-              <span class="upload-text">Choose image...</span>
-            </label>
-            <input type="file" id="bg-file-input-${slide.id}" accept="image/*" style="display:none;">
-            <div class="uploaded-image-preview ${bgVal.startsWith('url("data:image/') || bgVal.startsWith('url(\'data:image/') || bgVal.startsWith('url(data:image/') ? '' : 'hidden'}" id="bg-file-preview" style="margin-top:6px;">
-              <span class="uploaded-filename">Local Image Uploaded</span>
-              <button type="button" class="btn-remove-uploaded" id="bg-file-remove">×</button>
-            </div>
-          </div>
-        `;
-
-        bgImgField.appendChild(selectorWrapper);
-        body.appendChild(bgImgField);
-
-        const tabs = selectorWrapper.querySelectorAll('.img-tab-btn');
-        const urlInput = selectorWrapper.querySelector('#bg-src-url');
-        urlInput.value = bgVal.includes('data:image/') ? '' : bgUrlVal;
-
-        const fileInput = selectorWrapper.querySelector(`[type="file"]`);
-        const fileZone = selectorWrapper.querySelector('#bg-file-zone');
-        const filePreview = selectorWrapper.querySelector('#bg-file-preview');
-        const removeBtn = selectorWrapper.querySelector('#bg-file-remove');
-
-        tabs.forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.slideBgTabs[slide.id] = btn.getAttribute('data-tab');
-            this.render();
-          });
-        });
-
-        urlInput.addEventListener('change', () => {
-          const val = urlInput.value.trim();
-          if (val) {
-            state.updateNodeStyle(slide.id, 'background-image', `url("${val}")`);
-          } else {
-            state.updateNodeStyle(slide.id, 'background-image', null);
-          }
-        });
-
-        fileInput.addEventListener('change', () => {
-          const file = fileInput.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-              state.updateNodeStyle(slide.id, 'background-image', `url("${ev.target.result}")`);
-              this.render();
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-
-        removeBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          state.updateNodeStyle(slide.id, 'background-image', null);
-          this.render();
-        });
-
-        itemCard.appendChild(body);
-      }
-
       slidesList.appendChild(itemCard);
     });
 
@@ -830,8 +654,8 @@ export class AttributesPanelController {
       const val = heightInp.value.trim() || '400px';
       state.updateAttribute('data-height', val);
       state.updateStyle('height', val);
-      slides.forEach(slide => {
-        state.updateNodeStyle(slide.id, 'min-height', val);
+      slides.forEach(slideNode => {
+        state.updateNodeStyle(slideNode.id, 'min-height', val);
       });
     });
     heightField.appendChild(heightInp);
@@ -914,4 +738,225 @@ export class AttributesPanelController {
     idField.appendChild(idInp);
     this.specificContainer.appendChild(idField);
   }
+
+  renderSlideSettings(node) {
+    const parentSlider = state.findParent(node.id);
+    const titleNode = node.children.find(c => c.classes && c.classes.includes('cwb-slide-title'));
+    const descNode = node.children.find(c => c.classes && c.classes.includes('cwb-slide-desc'));
+    const buttonNode = node.children.find(c => c.classes && c.classes.includes('cwb-slide-button'));
+
+    // Back button
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-secondary-sm';
+    backBtn.style.marginBottom = '16px';
+    backBtn.style.width = '100%';
+    backBtn.innerHTML = '← Back to Slider Settings';
+    backBtn.addEventListener('click', () => {
+      if (parentSlider) {
+        state.selectNode(parentSlider.id);
+      }
+    });
+    this.specificContainer.appendChild(backBtn);
+
+    // Header Title
+    const title = document.createElement('h4');
+    title.innerText = "Slide Content Settings";
+    title.style.fontSize = "13px";
+    title.style.marginBottom = "12px";
+    title.style.fontWeight = "600";
+    title.style.color = "var(--text-main)";
+    this.specificContainer.appendChild(title);
+
+    // 1. Heading Content
+    if (titleNode) {
+      const field = document.createElement('div');
+      field.className = 'property-field';
+      field.style.marginBottom = '12px';
+      field.innerHTML = `<label>Heading Text</label>`;
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = titleNode.textContent || '';
+      inp.addEventListener('change', () => {
+        state.updateTextContent(titleNode.id, inp.value.trim());
+      });
+      field.appendChild(inp);
+      this.specificContainer.appendChild(field);
+    }
+
+    // 2. Description Content
+    if (descNode) {
+      const field = document.createElement('div');
+      field.className = 'property-field';
+      field.style.marginBottom = '12px';
+      field.innerHTML = `<label>Description Text</label>`;
+      const ta = document.createElement('textarea');
+      ta.style.height = '60px';
+      ta.value = descNode.textContent || '';
+      ta.addEventListener('change', () => {
+        state.updateTextContent(descNode.id, ta.value.trim());
+      });
+      field.appendChild(ta);
+      this.specificContainer.appendChild(field);
+    }
+
+    // 3. Button Label & Link
+    if (buttonNode) {
+      const field = document.createElement('div');
+      field.className = 'property-field';
+      field.style.marginBottom = '12px';
+      field.innerHTML = `<label>Button Text</label>`;
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = buttonNode.textContent || '';
+      inp.addEventListener('change', () => {
+        state.updateTextContent(buttonNode.id, inp.value.trim());
+      });
+      field.appendChild(inp);
+      this.specificContainer.appendChild(field);
+
+      const linkField = document.createElement('div');
+      linkField.className = 'property-field';
+      linkField.style.marginBottom = '12px';
+      linkField.innerHTML = `<label>Button Link URL</label>`;
+      const urlInp = document.createElement('input');
+      urlInp.type = 'text';
+      urlInp.value = buttonNode.attributes.href || '';
+      urlInp.addEventListener('change', () => {
+        state.updateNodeAttribute(buttonNode.id, 'href', urlInp.value.trim());
+      });
+      linkField.appendChild(urlInp);
+      this.specificContainer.appendChild(linkField);
+    }
+
+    // Divider
+    const divider = document.createElement('div');
+    divider.className = 'topbar-divider';
+    divider.style.margin = '16px 0 12px 0';
+    this.specificContainer.appendChild(divider);
+
+    // Style Title
+    const styleLabel = document.createElement('label');
+    styleLabel.innerText = "Background Options";
+    styleLabel.style.fontWeight = "600";
+    styleLabel.style.marginBottom = "8px";
+    styleLabel.style.display = "block";
+    this.specificContainer.appendChild(styleLabel);
+
+    // 4. Slide Background Color
+    const bgColorField = document.createElement('div');
+    bgColorField.className = 'property-field';
+    bgColorField.style.marginBottom = '12px';
+    bgColorField.innerHTML = `<label>Background Color</label>`;
+    const bgInp = document.createElement('input');
+    bgInp.type = 'text';
+    bgInp.placeholder = 'e.g. #3898ec or red';
+    bgInp.value = node.styles.desktop['background-color'] || '';
+    bgInp.addEventListener('change', () => {
+      state.updateNodeStyle(node.id, 'background-color', bgInp.value.trim());
+    });
+    bgColorField.appendChild(bgInp);
+    this.specificContainer.appendChild(bgColorField);
+
+    // 5. Slide Background Image
+    const bgImgField = document.createElement('div');
+    bgImgField.className = 'property-field';
+    bgImgField.innerHTML = `<label>Background Image</label>`;
+
+    const bgVal = node.styles.desktop['background-image'] || '';
+    let bgUrlVal = '';
+    if (bgVal.startsWith('url(')) {
+      bgUrlVal = bgVal.replace(/url\(['"]?([^'"]+)['"]?\)/gi, '$1');
+    }
+
+    const selectorWrapper = document.createElement('div');
+    selectorWrapper.className = 'image-selector-widget';
+    
+    const activeTab = this.slideBgTabs[node.id] || 'url';
+    const isUrlActive = (activeTab === 'url');
+
+    selectorWrapper.innerHTML = `
+      <div class="image-selector-tabs">
+        <button type="button" class="img-tab-btn ${isUrlActive ? 'active' : ''}" data-tab="url">URL</button>
+        <button type="button" class="img-tab-btn ${!isUrlActive ? 'active' : ''}" data-tab="file">Upload</button>
+      </div>
+      <div class="img-tab-content ${isUrlActive ? '' : 'hidden'}" id="bg-url-content">
+        <input type="text" id="bg-src-url" placeholder="https://example.com/bg.png" autocomplete="off" style="width:100%; margin-top:6px;">
+      </div>
+      <div class="img-tab-content ${!isUrlActive ? '' : 'hidden'}" id="bg-file-content">
+        <label class="file-upload-zone" id="bg-file-zone" for="bg-file-input-${node.id}" style="margin-top:6px; display:flex;">
+          <span class="upload-icon">📁</span>
+          <span class="upload-text">Choose image...</span>
+        </label>
+        <input type="file" id="bg-file-input-${node.id}" accept="image/*" style="display:none;">
+        <div class="uploaded-image-preview ${bgVal.includes('data:image/') ? '' : 'hidden'}" id="bg-file-preview" style="margin-top:6px;">
+          <span class="uploaded-filename">Local Image Uploaded</span>
+          <button type="button" class="btn-remove-uploaded" id="bg-file-remove">×</button>
+        </div>
+      </div>
+    `;
+
+    bgImgField.appendChild(selectorWrapper);
+    this.specificContainer.appendChild(bgImgField);
+
+    const tabs = selectorWrapper.querySelectorAll('.img-tab-btn');
+    const urlInput = selectorWrapper.querySelector('#bg-src-url');
+    urlInput.value = bgVal.includes('data:image/') ? '' : bgUrlVal;
+
+    const fileInput = selectorWrapper.querySelector(`[type="file"]`);
+    const fileZone = selectorWrapper.querySelector('#bg-file-zone');
+    const filePreview = selectorWrapper.querySelector('#bg-file-preview');
+    const removeBtn = selectorWrapper.querySelector('#bg-file-remove');
+
+    tabs.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.slideBgTabs[node.id] = btn.getAttribute('data-tab');
+        this.render();
+      });
+    });
+
+    urlInput.addEventListener('change', () => {
+      const val = urlInput.value.trim();
+      if (val) {
+        state.updateNodeStyle(node.id, 'background-image', `url("${val}")`);
+      } else {
+        state.updateNodeStyle(node.id, 'background-image', null);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.updateNodeStyle(node.id, 'background-image', `url("${ev.target.result}")`);
+          this.render();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      state.updateNodeStyle(node.id, 'background-image', null);
+      this.render();
+    });
+
+    // Add unique ID name setting field
+    const idField = document.createElement('div');
+    idField.className = 'property-field';
+    idField.style.marginTop = '16px';
+    idField.style.marginBottom = '12px';
+    idField.innerHTML = `<label>Unique Element Name (ID)</label>`;
+    const idInp = document.createElement('input');
+    idInp.type = 'text';
+    idInp.value = node.attributes['id'] || '';
+    idInp.placeholder = 'Unique reference name...';
+    idInp.addEventListener('change', () => {
+      state.updateAttribute('id', idInp.value.trim());
+    });
+    idField.appendChild(idInp);
+    this.specificContainer.appendChild(idField);
 }

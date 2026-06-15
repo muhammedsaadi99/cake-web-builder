@@ -536,7 +536,140 @@ export class CanvasController {
     // Restore scroll position
     this.iframe.contentWindow.scrollTo(scrollX, scrollY);
 
-    // Refresh active outlines
+    // Inject runtime script if in preview mode
+    let runtimeScript = doc.getElementById('cwb-slider-runtime');
+    if (state.previewMode) {
+      if (!runtimeScript) {
+        runtimeScript = doc.createElement('script');
+        runtimeScript.id = 'cwb-slider-runtime';
+        runtimeScript.textContent = `
+          (function() {
+            const initSliders = () => {
+              const sliders = document.querySelectorAll('.cwb-slider');
+              sliders.forEach(slider => {
+                const wrapper = slider.querySelector('.cwb-slides-wrapper');
+                const slides = slider.querySelectorAll('.cwb-slide');
+                const prevBtn = slider.querySelector('.cwb-slider-arrow.prev');
+                const nextBtn = slider.querySelector('.cwb-slider-arrow.next');
+                const dotsContainer = slider.querySelector('.cwb-slider-dots');
+                
+                let currentIndex = 0;
+                const totalSlides = slides.length;
+                if (totalSlides === 0) return;
+                
+                const autoplay = slider.getAttribute('data-autoplay') !== 'false';
+                const autoplaySpeed = parseInt(slider.getAttribute('data-autoplay-speed') || '3000', 10);
+                const loop = slider.getAttribute('data-loop') !== 'false';
+                const transition = slider.getAttribute('data-transition') || 'slide';
+                
+                function showSlide(index) {
+                  if (loop) {
+                    if (index >= totalSlides) currentIndex = 0;
+                    else if (index < 0) currentIndex = totalSlides - 1;
+                    else currentIndex = index;
+                  } else {
+                    if (index >= totalSlides || index < 0) return;
+                    currentIndex = index;
+                  }
+                  
+                  slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (transition === 'fade') {
+                      slide.style.opacity = i === currentIndex ? '1' : '0';
+                      slide.style.zIndex = i === currentIndex ? '1' : '0';
+                    }
+                  });
+                  
+                  slides[currentIndex].classList.add('active');
+                  
+                  if (transition === 'slide') {
+                    wrapper.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+                  }
+                  
+                  if (dotsContainer) {
+                    const dots = dotsContainer.querySelectorAll('.cwb-slider-dot');
+                    dots.forEach((dot, i) => {
+                      dot.classList.toggle('active', i === currentIndex);
+                    });
+                  }
+                }
+                
+                if (dotsContainer) {
+                  dotsContainer.innerHTML = '';
+                  for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = 'cwb-slider-dot' + (i === 0 ? ' active' : '');
+                    dot.addEventListener('click', (e) => { e.stopPropagation(); showSlide(i); });
+                    dotsContainer.appendChild(dot);
+                  }
+                }
+                
+                if (prevBtn) {
+                  prevBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showSlide(currentIndex - 1);
+                  });
+                }
+                if (nextBtn) {
+                  nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showSlide(currentIndex + 1);
+                  });
+                }
+                
+                let autoplayInterval;
+                function startAutoplay() {
+                  if (autoplay) {
+                    autoplayInterval = setInterval(() => {
+                      showSlide(currentIndex + 1);
+                    }, autoplaySpeed);
+                  }
+                }
+                
+                function stopAutoplay() {
+                  if (autoplayInterval) clearInterval(autoplayInterval);
+                }
+                
+                startAutoplay();
+                slider.addEventListener('mouseenter', stopAutoplay);
+                slider.addEventListener('mouseleave', startAutoplay);
+                
+                // Initial setup
+                if (transition === 'slide') {
+                  wrapper.style.display = 'flex';
+                  wrapper.style.width = (totalSlides * 100) + '%';
+                  slides.forEach(slide => {
+                    slide.style.display = 'flex';
+                    slide.style.flex = '0 0 100%';
+                  });
+                } else {
+                  wrapper.style.position = 'relative';
+                  slides.forEach((slide, i) => {
+                    slide.style.display = 'flex';
+                    slide.style.position = 'absolute';
+                    slide.style.top = '0';
+                    slide.style.left = '0';
+                    slide.style.width = '100%';
+                    slide.style.height = '100%';
+                    slide.style.transition = 'opacity 0.5s ease-in-out';
+                    slide.style.opacity = i === 0 ? '1' : '0';
+                    slide.style.zIndex = i === 0 ? '1' : '0';
+                  });
+                }
+                showSlide(0);
+              });
+            };
+            initSliders();
+          })();
+        `;
+        doc.body.appendChild(runtimeScript);
+      }
+    } else {
+      if (runtimeScript) {
+        runtimeScript.remove();
+      }
+    }
+
     this.updateSelectionOverlay();
 
     state.emit('canvasRendered');
