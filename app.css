@@ -2369,3 +2369,115 @@ button {
   pointer-events: none;
 }
 
+/* ==========================================================================
+   SLIDER PLUGIN STYLING
+   ========================================================================== */
+
+.slider-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-item-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.slider-item-card:hover {
+  border-color: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.slider-item-card.expanded {
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(99, 91, 255, 0.08);
+}
+
+.slider-item-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  background-color: var(--bg-tertiary);
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.slider-item-header:hover {
+  background-color: var(--bg-hover);
+}
+
+.slider-item-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  animation: cwb-slide-up 0.2s ease;
+}
+
+.slider-item-header .btn-attr-delete {
+  font-size: 11px;
+  padding: 2px 6px;
+  height: 20px;
+  width: auto;
+  min-width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  margin-left: 2px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.slider-item-header .btn-attr-delete:hover:not(:disabled) {
+  color: var(--text-main);
+  border-color: var(--accent-hover);
+  background: var(--bg-hover);
+}
+
+.slider-item-header .btn-attr-delete:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.slider-item-body .image-selector-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-tertiary);
+  padding: 2px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 8px;
+}
+
+.slider-item-body .img-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.slider-item-body .img-tab-btn.active {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+

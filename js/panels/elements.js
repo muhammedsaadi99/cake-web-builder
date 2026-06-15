@@ -17,6 +17,8 @@ export class ElementsPanelController {
     const clsList = classes || [];
     if (t === 'section') return 'Section';
     if (t === 'div') {
+      if (clsList.includes('cwb-slider')) return 'Slider';
+      if (clsList.includes('cwb-slide')) return 'Slide';
       if (clsList.includes('w-container')) return 'Container';
       if (clsList.includes('flex') || clsList.includes('w-flex-row') || clsList.includes('w-flex-col') || clsList.some(c => c.includes('flex'))) return 'Flexbox';
       return 'Box Container';

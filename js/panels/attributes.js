@@ -6,6 +6,8 @@ export class AttributesPanelController {
     this.customList = document.getElementById('custom-attr-list');
     this.btnAddCustom = document.getElementById('btn-add-custom-attr');
     this.activeImgTab = 'url'; // Track active image tab
+    this.expandedSlideIndex = -1; // Track which slide item is expanded
+    this.slideBgTabs = {}; // Track background image tab per slide ID
 
     this.init();
   }
@@ -67,6 +69,11 @@ export class AttributesPanelController {
   renderSpecificFields(node) {
     const tag = node.tag;
     const attrs = node.attributes || {};
+
+    if (node.classes && node.classes.includes('cwb-slider')) {
+      this.renderSliderSettings(node);
+      return;
+    }
 
     const createField = (labelName, keyName, placeholderText = "") => {
       const field = document.createElement('div');
@@ -310,5 +317,601 @@ export class AttributesPanelController {
       
       this.customList.appendChild(row);
     });
+  }
+
+  renderSliderSettings(node) {
+    const attrs = node.attributes || {};
+    const slides = node.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+    const activeIdx = parseInt(attrs['data-active-index'] || '0', 10);
+
+    // Header Title
+    const title = document.createElement('h4');
+    title.innerText = "Slider Settings";
+    title.style.fontSize = "13px";
+    title.style.marginBottom = "12px";
+    title.style.fontWeight = "600";
+    title.style.color = "var(--text-main)";
+    this.specificContainer.appendChild(title);
+
+    // --- Active Slide Dropdown ---
+    const activeSlideField = document.createElement('div');
+    activeSlideField.className = 'property-field';
+    activeSlideField.style.marginBottom = '12px';
+    activeSlideField.innerHTML = `<label>Active Slide in Workspace</label>`;
+    
+    const activeSelect = document.createElement('select');
+    activeSelect.style.width = '100%';
+    slides.forEach((slide, i) => {
+      const titleNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-title'));
+      const labelText = titleNode ? titleNode.textContent : `Slide ${i + 1}`;
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.innerText = `${i + 1}: ${labelText.substring(0, 20)}`;
+      if (i === activeIdx) opt.selected = true;
+      activeSelect.appendChild(opt);
+    });
+    
+    activeSelect.addEventListener('change', () => {
+      state.updateAttribute('data-active-index', activeSelect.value);
+    });
+    activeSlideField.appendChild(activeSelect);
+    this.specificContainer.appendChild(activeSlideField);
+
+    // Divider
+    const divider = document.createElement('div');
+    divider.className = 'topbar-divider';
+    divider.style.margin = '16px 0 12px 0';
+    this.specificContainer.appendChild(divider);
+
+    // Slides List Section Title
+    const slidesTitle = document.createElement('div');
+    slidesTitle.style.display = 'flex';
+    slidesTitle.style.justifyContent = 'space-between';
+    slidesTitle.style.alignItems = 'center';
+    slidesTitle.style.marginBottom = '8px';
+    slidesTitle.innerHTML = `<label style="font-weight:600; margin:0;">Slide Items Manager</label>`;
+    
+    const btnAddSlide = document.createElement('button');
+    btnAddSlide.className = 'btn-secondary-sm';
+    btnAddSlide.innerHTML = '＋ Add Slide';
+    btnAddSlide.addEventListener('click', () => {
+      const newSlide = {
+        id: state.generateId(),
+        tag: 'div',
+        classes: ['cwb-slide'],
+        attributes: {},
+        styles: {
+          desktop: {
+            'background-color': '#a3a0fb',
+            'padding': '60px 40px',
+            'display': 'flex',
+            'flex-direction': 'column',
+            'justify-content': 'center',
+            'align-items': 'center',
+            'min-height': '400px',
+            'color': '#ffffff',
+            'text-align': 'center',
+            'background-size': 'cover',
+            'background-position': 'center',
+            'background-repeat': 'no-repeat'
+          }
+        },
+        children: [
+          {
+            id: state.generateId(),
+            tag: 'h2',
+            classes: ['cwb-slide-title'],
+            textContent: `New Slide Heading`,
+            styles: {
+              desktop: {
+                'color': '#ffffff',
+                'font-size': '36px',
+                'margin-bottom': '15px',
+                'font-family': 'var(--font-primary)'
+              }
+            },
+            children: []
+          },
+          {
+            id: state.generateId(),
+            tag: 'p',
+            classes: ['cwb-slide-desc'],
+            textContent: `This is a new slide. Adjust its contents in Settings.`,
+            styles: {
+              desktop: {
+                'color': '#e0e0e0',
+                'font-size': '16px',
+                'margin-bottom': '25px',
+                'font-family': 'var(--font-secondary)',
+                'max-width': '600px'
+              }
+            },
+            children: []
+          },
+          {
+            id: state.generateId(),
+            tag: 'a',
+            classes: ['cwb-slide-button', 'w-button'],
+            textContent: 'Explore Now',
+            attributes: { href: '#' },
+            styles: {
+              desktop: {
+                'background-color': '#ffffff',
+                'color': '#a3a0fb',
+                'padding': '10px 24px',
+                'border-radius': '4px',
+                'font-weight': '600'
+              }
+            },
+            children: []
+          }
+        ]
+      };
+      node.children.push(newSlide);
+      this.expandedSlideIndex = node.children.length - 1;
+      state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+      state.saveHistory();
+      this.render();
+    });
+    
+    slidesTitle.appendChild(btnAddSlide);
+    this.specificContainer.appendChild(slidesTitle);
+
+    // --- Slide Items Accordion List ---
+    const slidesList = document.createElement('div');
+    slidesList.className = 'slider-items-list';
+    slidesList.style.display = 'flex';
+    slidesList.style.flexDirection = 'column';
+    slidesList.style.gap = '8px';
+    slidesList.style.marginBottom = '16px';
+
+    slides.forEach((slide, i) => {
+      const titleNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-title'));
+      const descNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-desc'));
+      const buttonNode = slide.children.find(c => c.classes && c.classes.includes('cwb-slide-button'));
+
+      const isExpanded = this.expandedSlideIndex === i;
+
+      const itemCard = document.createElement('div');
+      itemCard.className = `slider-item-card ${isExpanded ? 'expanded' : ''}`;
+      itemCard.style.border = '1px solid var(--border-color)';
+      itemCard.style.borderRadius = '6px';
+      itemCard.style.backgroundColor = 'var(--bg-secondary)';
+      itemCard.style.overflow = 'hidden';
+
+      // Header Row
+      const header = document.createElement('div');
+      header.className = 'slider-item-header';
+      header.style.padding = '8px 12px';
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.justifyContent = 'space-between';
+      header.style.cursor = 'pointer';
+      header.style.backgroundColor = 'var(--bg-tertiary)';
+      header.style.borderBottom = isExpanded ? '1px solid var(--border-color)' : 'none';
+
+      // Title & Arrow
+      const titleWrap = document.createElement('div');
+      titleWrap.style.display = 'flex';
+      titleWrap.style.alignItems = 'center';
+      titleWrap.style.gap = '8px';
+      
+      const arrow = document.createElement('span');
+      arrow.innerHTML = isExpanded ? '▼' : '▶';
+      arrow.style.fontSize = '9px';
+      arrow.style.color = 'var(--text-muted)';
+      
+      const titleSpan = document.createElement('span');
+      titleSpan.innerText = titleNode ? titleNode.textContent : `Slide ${i + 1}`;
+      titleSpan.style.fontSize = '12px';
+      titleSpan.style.fontWeight = '600';
+      titleSpan.style.color = 'var(--text-main)';
+
+      titleWrap.appendChild(arrow);
+      titleWrap.appendChild(titleSpan);
+      header.appendChild(titleWrap);
+
+      // Actions wrapper
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '4px';
+
+      // Up button
+      const btnUp = document.createElement('button');
+      btnUp.className = 'btn-attr-delete';
+      btnUp.innerHTML = '↑';
+      btnUp.title = 'Move Slide Up';
+      btnUp.disabled = i === 0;
+      btnUp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = node.children.indexOf(slide);
+        let prevIdx = -1;
+        for (let k = idx - 1; k >= 0; k--) {
+          if (node.children[k].classes && node.children[k].classes.includes('cwb-slide')) {
+            prevIdx = k;
+            break;
+          }
+        }
+        if (prevIdx !== -1) {
+          const temp = node.children[idx];
+          node.children[idx] = node.children[prevIdx];
+          node.children[prevIdx] = temp;
+          this.expandedSlideIndex = i - 1;
+          state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+          state.saveHistory();
+          this.render();
+        }
+      });
+
+      // Down button
+      const btnDown = document.createElement('button');
+      btnDown.className = 'btn-attr-delete';
+      btnDown.innerHTML = '↓';
+      btnDown.title = 'Move Slide Down';
+      btnDown.disabled = i === slides.length - 1;
+      btnDown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = node.children.indexOf(slide);
+        let nextIdx = -1;
+        for (let k = idx + 1; k < node.children.length; k++) {
+          if (node.children[k].classes && node.children[k].classes.includes('cwb-slide')) {
+            nextIdx = k;
+            break;
+          }
+        }
+        if (nextIdx !== -1) {
+          const temp = node.children[idx];
+          node.children[idx] = node.children[nextIdx];
+          node.children[nextIdx] = temp;
+          this.expandedSlideIndex = i + 1;
+          state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+          state.saveHistory();
+          this.render();
+        }
+      });
+
+      // Duplicate button
+      const btnDuplicate = document.createElement('button');
+      btnDuplicate.className = 'btn-attr-delete';
+      btnDuplicate.innerHTML = '⧉';
+      btnDuplicate.title = 'Duplicate Slide';
+      btnDuplicate.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cloned = JSON.parse(JSON.stringify(slide));
+        cloned.id = state.generateId();
+        cloned.children.forEach(c => {
+          c.id = state.generateId();
+        });
+        const idx = node.children.indexOf(slide);
+        node.children.splice(idx + 1, 0, cloned);
+        this.expandedSlideIndex = i + 1;
+        state.updateAttribute('data-active-index', this.expandedSlideIndex.toString());
+        state.saveHistory();
+        this.render();
+      });
+
+      // Delete button
+      const btnDel = document.createElement('button');
+      btnDel.className = 'btn-attr-delete';
+      btnDel.innerHTML = '×';
+      btnDel.title = 'Delete Slide';
+      btnDel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (slides.length <= 1) {
+          alert("A slider must have at least one slide!");
+          return;
+        }
+        const idx = node.children.indexOf(slide);
+        node.children.splice(idx, 1);
+        
+        let newActive = activeIdx;
+        if (newActive >= slides.length - 1) {
+          newActive = Math.max(0, slides.length - 2);
+        }
+        this.expandedSlideIndex = -1;
+        state.updateAttribute('data-active-index', newActive.toString());
+        state.saveHistory();
+        this.render();
+      });
+
+      actions.appendChild(btnUp);
+      actions.appendChild(btnDown);
+      actions.appendChild(btnDuplicate);
+      actions.appendChild(btnDel);
+      header.appendChild(actions);
+
+      header.addEventListener('click', () => {
+        this.expandedSlideIndex = isExpanded ? -1 : i;
+        state.updateAttribute('data-active-index', i.toString());
+        this.render();
+      });
+
+      itemCard.appendChild(header);
+
+      if (isExpanded) {
+        const body = document.createElement('div');
+        body.className = 'slider-item-body';
+        body.style.padding = '12px';
+        body.style.display = 'flex';
+        body.style.flexDirection = 'column';
+        body.style.gap = '10px';
+
+        // 1. Heading Content
+        if (titleNode) {
+          const field = document.createElement('div');
+          field.className = 'property-field';
+          field.innerHTML = `<label>Heading Text</label>`;
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.value = titleNode.textContent || '';
+          inp.addEventListener('change', () => {
+            state.updateTextContent(titleNode.id, inp.value.trim());
+          });
+          field.appendChild(inp);
+          body.appendChild(field);
+        }
+
+        // 2. Description Content
+        if (descNode) {
+          const field = document.createElement('div');
+          field.className = 'property-field';
+          field.innerHTML = `<label>Description Text</label>`;
+          const ta = document.createElement('textarea');
+          ta.style.height = '50px';
+          ta.value = descNode.textContent || '';
+          ta.addEventListener('change', () => {
+            state.updateTextContent(descNode.id, ta.value.trim());
+          });
+          field.appendChild(ta);
+          body.appendChild(field);
+        }
+
+        // 3. Button Label
+        if (buttonNode) {
+          const field = document.createElement('div');
+          field.className = 'property-field';
+          field.innerHTML = `<label>Button Text</label>`;
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.value = buttonNode.textContent || '';
+          inp.addEventListener('change', () => {
+            state.updateTextContent(buttonNode.id, inp.value.trim());
+          });
+          field.appendChild(inp);
+          body.appendChild(field);
+
+          // Button URL
+          const linkField = document.createElement('div');
+          linkField.className = 'property-field';
+          linkField.innerHTML = `<label>Button Link URL</label>`;
+          const urlInp = document.createElement('input');
+          urlInp.type = 'text';
+          urlInp.value = buttonNode.attributes.href || '';
+          urlInp.addEventListener('change', () => {
+            state.updateNodeAttribute(buttonNode.id, 'href', urlInp.value.trim());
+          });
+          linkField.appendChild(urlInp);
+          body.appendChild(linkField);
+        }
+
+        // 4. Slide Background Color
+        const bgColorField = document.createElement('div');
+        bgColorField.className = 'property-field';
+        bgColorField.innerHTML = `<label>Background Color</label>`;
+        const bgInp = document.createElement('input');
+        bgInp.type = 'text';
+        bgInp.placeholder = '#ffffff';
+        bgInp.value = slide.styles.desktop['background-color'] || '';
+        bgInp.addEventListener('change', () => {
+          state.updateNodeStyle(slide.id, 'background-color', bgInp.value.trim());
+        });
+        bgColorField.appendChild(bgInp);
+        body.appendChild(bgColorField);
+
+        // 5. Slide Background Image
+        const bgImgField = document.createElement('div');
+        bgImgField.className = 'property-field';
+        bgImgField.innerHTML = `<label>Background Image</label>`;
+
+        const bgVal = slide.styles.desktop['background-image'] || '';
+        let bgUrlVal = '';
+        if (bgVal.startsWith('url(')) {
+          bgUrlVal = bgVal.replace(/url\(['"]?([^'"]+)['"]?\)/gi, '$1');
+        }
+
+        const selectorWrapper = document.createElement('div');
+        selectorWrapper.className = 'image-selector-widget';
+        
+        const activeTab = this.slideBgTabs[slide.id] || 'url';
+        const isUrlActive = (activeTab === 'url');
+
+        selectorWrapper.innerHTML = `
+          <div class="image-selector-tabs">
+            <button type="button" class="img-tab-btn ${isUrlActive ? 'active' : ''}" data-tab="url">URL</button>
+            <button type="button" class="img-tab-btn ${!isUrlActive ? 'active' : ''}" data-tab="file">Upload</button>
+          </div>
+          <div class="img-tab-content ${isUrlActive ? '' : 'hidden'}" id="bg-url-content">
+            <input type="text" id="bg-src-url" placeholder="https://example.com/bg.png" autocomplete="off" style="width:100%; margin-top:6px;">
+          </div>
+          <div class="img-tab-content ${!isUrlActive ? '' : 'hidden'}" id="bg-file-content">
+            <label class="file-upload-zone" id="bg-file-zone" for="bg-file-input-${slide.id}" style="margin-top:6px; display:flex;">
+              <span class="upload-icon">📁</span>
+              <span class="upload-text">Choose image...</span>
+            </label>
+            <input type="file" id="bg-file-input-${slide.id}" accept="image/*" style="display:none;">
+            <div class="uploaded-image-preview ${bgVal.startsWith('url("data:image/') || bgVal.startsWith('url(\'data:image/') || bgVal.startsWith('url(data:image/') ? '' : 'hidden'}" id="bg-file-preview" style="margin-top:6px;">
+              <span class="uploaded-filename">Local Image Uploaded</span>
+              <button type="button" class="btn-remove-uploaded" id="bg-file-remove">×</button>
+            </div>
+          </div>
+        `;
+
+        bgImgField.appendChild(selectorWrapper);
+        body.appendChild(bgImgField);
+
+        const tabs = selectorWrapper.querySelectorAll('.img-tab-btn');
+        const urlInput = selectorWrapper.querySelector('#bg-src-url');
+        urlInput.value = bgVal.includes('data:image/') ? '' : bgUrlVal;
+
+        const fileInput = selectorWrapper.querySelector(`[type="file"]`);
+        const fileZone = selectorWrapper.querySelector('#bg-file-zone');
+        const filePreview = selectorWrapper.querySelector('#bg-file-preview');
+        const removeBtn = selectorWrapper.querySelector('#bg-file-remove');
+
+        tabs.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.slideBgTabs[slide.id] = btn.getAttribute('data-tab');
+            this.render();
+          });
+        });
+
+        urlInput.addEventListener('change', () => {
+          const val = urlInput.value.trim();
+          if (val) {
+            state.updateNodeStyle(slide.id, 'background-image', `url("${val}")`);
+          } else {
+            state.updateNodeStyle(slide.id, 'background-image', null);
+          }
+        });
+
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              state.updateNodeStyle(slide.id, 'background-image', `url("${ev.target.result}")`);
+              this.render();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        removeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          state.updateNodeStyle(slide.id, 'background-image', null);
+          this.render();
+        });
+
+        itemCard.appendChild(body);
+      }
+
+      slidesList.appendChild(itemCard);
+    });
+
+    this.specificContainer.appendChild(slidesList);
+
+    // Divider
+    const dividerSettings = document.createElement('div');
+    dividerSettings.className = 'topbar-divider';
+    dividerSettings.style.margin = '16px 0 12px 0';
+    this.specificContainer.appendChild(dividerSettings);
+
+    // Slider Configuration Settings label
+    const settingsLabel = document.createElement('label');
+    settingsLabel.innerText = "Carousel Options";
+    settingsLabel.style.fontWeight = "600";
+    settingsLabel.style.marginBottom = "8px";
+    settingsLabel.style.display = "block";
+    this.specificContainer.appendChild(settingsLabel);
+
+    // Slider Height
+    const heightField = document.createElement('div');
+    heightField.className = 'property-field';
+    heightField.style.marginBottom = '12px';
+    heightField.innerHTML = `<label>Slider Height</label>`;
+    const heightInp = document.createElement('input');
+    heightInp.type = 'text';
+    heightInp.value = attrs['data-height'] || '400px';
+    heightInp.placeholder = 'e.g. 400px or 50vh';
+    heightInp.addEventListener('change', () => {
+      const val = heightInp.value.trim() || '400px';
+      state.updateAttribute('data-height', val);
+      state.updateStyle('height', val);
+      slides.forEach(slide => {
+        state.updateNodeStyle(slide.id, 'min-height', val);
+      });
+    });
+    heightField.appendChild(heightInp);
+    this.specificContainer.appendChild(heightField);
+
+    // Helper to create select field
+    const createSelectField = (labelName, attrName, options, currentVal) => {
+      const field = document.createElement('div');
+      field.className = 'property-field';
+      field.style.marginBottom = '12px';
+      field.innerHTML = `<label>${labelName}</label>`;
+      const select = document.createElement('select');
+      select.style.width = '100%';
+      options.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt.value;
+        o.innerText = opt.label;
+        if (opt.value === currentVal) o.selected = true;
+        select.appendChild(o);
+      });
+      select.addEventListener('change', () => {
+        state.updateAttribute(attrName, select.value);
+      });
+      field.appendChild(select);
+      this.specificContainer.appendChild(field);
+    };
+
+    // Autoplay
+    createSelectField("Autoplay Slides", "data-autoplay", [
+      { value: 'true', label: 'On' },
+      { value: 'false', label: 'Off' }
+    ], attrs['data-autoplay'] || 'true');
+
+    // Autoplay Speed
+    const speedField = document.createElement('div');
+    speedField.className = 'property-field';
+    speedField.style.marginBottom = '12px';
+    speedField.innerHTML = `<label>Autoplay Speed (ms)</label>`;
+    const speedInp = document.createElement('input');
+    speedInp.type = 'number';
+    speedInp.value = attrs['data-autoplay-speed'] || '3000';
+    speedInp.addEventListener('change', () => {
+      state.updateAttribute('data-autoplay-speed', speedInp.value);
+    });
+    speedField.appendChild(speedInp);
+    this.specificContainer.appendChild(speedField);
+
+    // Infinite Loop
+    createSelectField("Infinite Loop", "data-loop", [
+      { value: 'true', label: 'Yes' },
+      { value: 'false', label: 'No' }
+    ], attrs['data-loop'] || 'true');
+
+    // Transition Effect
+    createSelectField("Transition Effect", "data-transition", [
+      { value: 'slide', label: 'Slide' },
+      { value: 'fade', label: 'Fade' }
+    ], attrs['data-transition'] || 'slide');
+
+    // Navigation Controls
+    createSelectField("Navigation Elements", "data-navigation", [
+      { value: 'both', label: 'Arrows & Dots' },
+      { value: 'arrows', label: 'Arrows Only' },
+      { value: 'dots', label: 'Dots Only' },
+      { value: 'none', label: 'None' }
+    ], attrs['data-navigation'] || 'both');
+
+    // Add unique ID name setting field
+    const idField = document.createElement('div');
+    idField.className = 'property-field';
+    idField.style.marginBottom = '12px';
+    idField.innerHTML = `<label>Unique Element Name (ID)</label>`;
+    const idInp = document.createElement('input');
+    idInp.type = 'text';
+    idInp.value = attrs['id'] || '';
+    idInp.placeholder = 'Unique reference name...';
+    idInp.addEventListener('change', () => {
+      state.updateAttribute('id', idInp.value.trim());
+    });
+    idField.appendChild(idInp);
+    this.specificContainer.appendChild(idField);
   }
 }

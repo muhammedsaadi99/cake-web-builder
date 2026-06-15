@@ -534,6 +534,97 @@ class StateManager {
       newNode.attributes.placeholder = properties.placeholder;
     }
 
+    if (newNode.classes.includes('cwb-slider')) {
+      newNode.attributes['data-autoplay'] = 'true';
+      newNode.attributes['data-autoplay-speed'] = '3000';
+      newNode.attributes['data-loop'] = 'true';
+      newNode.attributes['data-navigation'] = 'both';
+      newNode.attributes['data-transition'] = 'slide';
+      newNode.attributes['data-height'] = '400px';
+      newNode.attributes['data-active-index'] = '0';
+      
+      newNode.styles.desktop['height'] = '400px';
+
+      for (let i = 1; i <= 2; i++) {
+        const slideId = this.generateId();
+        const slideNode = {
+          id: slideId,
+          tag: 'div',
+          classes: ['cwb-slide'],
+          attributes: {},
+          styles: {
+            desktop: {
+              'background-color': i === 1 ? '#5f5cfd' : '#3898ec',
+              'padding': '60px 40px',
+              'display': 'flex',
+              'flex-direction': 'column',
+              'justify-content': 'center',
+              'align-items': 'center',
+              'min-height': '400px',
+              'color': '#ffffff',
+              'text-align': 'center',
+              'background-size': 'cover',
+              'background-position': 'center',
+              'background-repeat': 'no-repeat'
+            }
+          },
+          children: [
+            {
+              id: this.generateId(),
+              tag: 'h2',
+              classes: ['cwb-slide-title'],
+              textContent: `Slide ${i} Heading`,
+              styles: {
+                desktop: {
+                  'color': '#ffffff',
+                  'font-size': '36px',
+                  'margin-bottom': '15px',
+                  'font-family': 'var(--font-primary)'
+                }
+              },
+              children: []
+            },
+            {
+              id: this.generateId(),
+              tag: 'p',
+              classes: ['cwb-slide-desc'],
+              textContent: `This is slide ${i} description. Customize it in the settings panel.`,
+              styles: {
+                desktop: {
+                  'color': '#e0e0e0',
+                  'font-size': '16px',
+                  'margin-bottom': '25px',
+                  'font-family': 'var(--font-secondary)',
+                  'max-width': '600px'
+                }
+              },
+              children: []
+            },
+            {
+              id: this.generateId(),
+              tag: 'a',
+              classes: ['cwb-slide-button', 'w-button'],
+              textContent: i === 1 ? 'Learn More' : 'Get Started',
+              attributes: {
+                href: '#'
+              },
+              styles: {
+                desktop: {
+                  'background-color': '#ffffff',
+                  'color': i === 1 ? '#5f5cfd' : '#3898ec',
+                  'padding': '10px 24px',
+                  'border-radius': '4px',
+                  'font-weight': '600'
+                }
+              },
+              children: []
+            }
+          ]
+        };
+        newNode.children.push(slideNode);
+      }
+    }
+
     // Default container styling for Flex
     if (properties.display === 'flex') {
       newNode.styles.desktop.display = 'flex';
@@ -858,6 +949,46 @@ class StateManager {
     } else {
       node.attributes[key] = value;
     }
+    this.saveHistory();
+  }
+
+  updateNodeAttribute(nodeId, key, value) {
+    const node = this.findNode(nodeId);
+    if (!node) return;
+    
+    if (!node.attributes) {
+      node.attributes = {};
+    }
+    
+    if (value === null) {
+      delete node.attributes[key];
+    } else {
+      node.attributes[key] = value;
+    }
+    this.saveHistory();
+  }
+
+  updateNodeStyle(nodeId, property, value, breakpoint = "desktop") {
+    const node = this.findNode(nodeId);
+    if (!node) return;
+    
+    if (!node.styles) {
+      node.styles = {};
+    }
+    if (!node.styles[breakpoint]) {
+      node.styles[breakpoint] = {};
+    }
+    
+    if (value === null || value === "") {
+      delete node.styles[breakpoint][property];
+    } else {
+      node.styles[breakpoint][property] = value;
+    }
+    
+    if (Object.keys(node.styles[breakpoint]).length === 0) {
+      delete node.styles[breakpoint];
+    }
+    
     this.saveHistory();
   }
 

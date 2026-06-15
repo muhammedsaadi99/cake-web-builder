@@ -4,6 +4,199 @@
  * into a single, clean, self-contained HTML/CSS production file.
  */
 
+const SLIDER_BASE_CSS = `
+/* Slider Component Structural Styles */
+.cwb-slider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.cwb-slides-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+.cwb-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.cwb-slide.active {
+  display: flex !important;
+}
+.cwb-slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, opacity 0.2s;
+  z-index: 10;
+  outline: none;
+}
+.cwb-slider-arrow:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+.cwb-slider-arrow.prev {
+  left: 20px;
+}
+.cwb-slider-arrow.next {
+  right: 20px;
+}
+.cwb-slider-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.cwb-slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.cwb-slider-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.2);
+}
+.cwb-slider-dot.active {
+  background: #ffffff;
+  transform: scale(1.2);
+}
+`;
+
+const SLIDER_BASE_JS = `
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sliders = document.querySelectorAll('.cwb-slider');
+  sliders.forEach(slider => {
+    const wrapper = slider.querySelector('.cwb-slides-wrapper');
+    const slides = slider.querySelectorAll('.cwb-slide');
+    const prevBtn = slider.querySelector('.cwb-slider-arrow.prev');
+    const nextBtn = slider.querySelector('.cwb-slider-arrow.next');
+    const dotsContainer = slider.querySelector('.cwb-slider-dots');
+    
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    if (totalSlides === 0) return;
+    
+    const autoplay = slider.getAttribute('data-autoplay') !== 'false';
+    const autoplaySpeed = parseInt(slider.getAttribute('data-autoplay-speed') || '3000', 10);
+    const loop = slider.getAttribute('data-loop') !== 'false';
+    const transition = slider.getAttribute('data-transition') || 'slide';
+    
+    function showSlide(index) {
+      if (loop) {
+        if (index >= totalSlides) currentIndex = 0;
+        else if (index < 0) currentIndex = totalSlides - 1;
+        else currentIndex = index;
+      } else {
+        if (index >= totalSlides || index < 0) return;
+        currentIndex = index;
+      }
+      
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active');
+        if (transition === 'fade') {
+          slide.style.opacity = i === currentIndex ? '1' : '0';
+          slide.style.zIndex = i === currentIndex ? '1' : '0';
+        }
+      });
+      
+      slides[currentIndex].classList.add('active');
+      
+      if (transition === 'slide') {
+        wrapper.style.transform = \`translateX(-\${currentIndex * 100}%)\`;
+      }
+      
+      if (dotsContainer) {
+        const dots = dotsContainer.querySelectorAll('.cwb-slider-dot');
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentIndex);
+        });
+      }
+    }
+    
+    if (dotsContainer) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('span');
+        dot.className = \`cwb-slider-dot\${i === 0 ? ' active' : ''}\`;
+        dot.addEventListener('click', () => showSlide(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+    
+    let autoplayInterval;
+    function startAutoplay() {
+      if (autoplay) {
+        autoplayInterval = setInterval(() => {
+          showSlide(currentIndex + 1);
+        }, autoplaySpeed);
+      }
+    }
+    
+    function stopAutoplay() {
+      if (autoplayInterval) clearInterval(autoplayInterval);
+    }
+    
+    startAutoplay();
+    slider.addEventListener('mouseenter', stopAutoplay);
+    slider.addEventListener('mouseleave', startAutoplay);
+    
+    // Initial setup
+    if (transition === 'slide') {
+      wrapper.style.display = 'flex';
+      wrapper.style.width = \`\${totalSlides * 100}%\`;
+      slides.forEach(slide => {
+        slide.style.display = 'flex';
+        slide.style.flex = '0 0 100%';
+      });
+    } else {
+      wrapper.style.position = 'relative';
+      slides.forEach((slide, i) => {
+        slide.style.display = 'flex';
+        slide.style.position = 'absolute';
+        slide.style.top = '0';
+        slide.style.left = '0';
+        slide.style.width = '100%';
+        slide.style.height = '100%';
+        slide.style.transition = 'opacity 0.5s ease-in-out';
+        slide.style.opacity = i === 0 ? '1' : '0';
+        slide.style.zIndex = i === 0 ? '1' : '0';
+      });
+    }
+    showSlide(0);
+  });
+});
+</script>
+`;
+
 export class Exporter {
   static exportCode(docState) {
     const JSZip = window.JSZip;
@@ -156,6 +349,7 @@ export class Exporter {
 </head>
 <body>
 ${compiledHtml.split('\n').map(line => '  ' + line).join('\n')}
+${SLIDER_BASE_JS}
 </body>
 </html>`;
 
@@ -180,6 +374,7 @@ input, textarea, button, select {
   font: inherit;
 }
 
+${SLIDER_BASE_CSS}
 
 /* Compiled Stylesheet */
 ${compiledCss}`;
@@ -261,6 +456,7 @@ ${compiledCss}`;
       font: inherit;
     }
 
+    ${SLIDER_BASE_CSS}
     
     /* Compiled Stylesheet */
 ${compiledCss.split('\n').map(line => '    ' + line).join('\n')}
@@ -268,6 +464,7 @@ ${compiledCss.split('\n').map(line => '    ' + line).join('\n')}
 </head>
 <body>
 ${compiledHtml.split('\n').map(line => '  ' + line).join('\n')}
+${SLIDER_BASE_JS}
 </body>
 </html>`;
 
@@ -369,6 +566,24 @@ ${compiledHtml.split('\n').map(line => '  ' + line).join('\n')}
       }).join('\n');
     }
 
+    if (node.classes && node.classes.includes('cwb-slider')) {
+      const slideCount = node.children ? node.children.filter(c => c.classes && c.classes.includes('cwb-slide')).length : 0;
+      let dotsHtml = '';
+      for (let i = 0; i < slideCount; i++) {
+        dotsHtml += `<span class="cwb-slider-dot${i === 0 ? ' active' : ''}"></span>`;
+      }
+      
+      childrenHtml = `
+  <div class="cwb-slides-wrapper">
+${childrenHtml.split('\n').map(line => '    ' + line).join('\n')}
+  </div>
+  <button class="cwb-slider-arrow prev">&#10094;</button>
+  <button class="cwb-slider-arrow next">&#10095;</button>
+  <div class="cwb-slider-dots">
+    ${dotsHtml}
+  </div>`;
+    }
+
     // Void elements checking
     const voidTags = ['img', 'input', 'br', 'hr', 'meta', 'link'];
     if (voidTags.includes(tag)) {
@@ -376,6 +591,9 @@ ${compiledHtml.split('\n').map(line => '  ' + line).join('\n')}
     }
 
     if (childrenHtml) {
+      if (node.classes && node.classes.includes('cwb-slider')) {
+        return `<${tag}${attrStr}>${childrenHtml}\n</${tag}>`;
+      }
       return `<${tag}${attrStr}>\n${childrenHtml.split('\n').map(line => '  ' + line).join('\n')}\n</${tag}>`;
     } else {
       return `<${tag}${attrStr}>${textContent}</${tag}>`;

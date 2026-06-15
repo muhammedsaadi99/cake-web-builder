@@ -89,6 +89,8 @@ export function getFriendlyTagName(tag, classes = []) {
   const clsList = classes || [];
   if (t === 'section') return 'Section';
   if (t === 'div') {
+    if (clsList.includes('cwb-slider')) return 'Slider';
+    if (clsList.includes('cwb-slide')) return 'Slide';
     if (clsList.includes('w-container')) return 'Container';
     if (clsList.includes('flex') || clsList.includes('w-flex-row') || clsList.includes('w-flex-col') || clsList.some(c => c.includes('flex'))) return 'Flexbox';
     return 'Box Container';
@@ -325,7 +327,7 @@ export class CanvasController {
     rootContainer.innerHTML = '';
 
     // Generate HTML elements starting from JSON root node
-    const renderNode = (node) => {
+    const renderNode = (node, parentNode = null) => {
       let el;
       if (node.tag === 'img') {
         el = doc.createElement('img');
@@ -345,9 +347,25 @@ export class CanvasController {
       }
 
       // Class names
-      if (node.classes && node.classes.length > 0) {
-        el.className = node.classes.join(' ');
-        el.setAttribute('data-cwb-class', node.classes.join(', '));
+      let finalClasses = [...(node.classes || [])];
+      
+      // Handle slide active class injection in the editor
+      if (parentNode && parentNode.classes && parentNode.classes.includes('cwb-slider') && finalClasses.includes('cwb-slide')) {
+        const slides = parentNode.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+        const slideIndex = slides.indexOf(node);
+        const activeIdx = parseInt(parentNode.attributes['data-active-index'] || '0', 10);
+        if (slideIndex === activeIdx) {
+          if (!finalClasses.includes('active')) {
+            finalClasses.push('active');
+          }
+        } else {
+          finalClasses = finalClasses.filter(c => c !== 'active');
+        }
+      }
+
+      if (finalClasses.length > 0) {
+        el.className = finalClasses.join(' ');
+        el.setAttribute('data-cwb-class', finalClasses.join(', '));
       } else {
         el.setAttribute('data-cwb-class', 'No Class');
       }
@@ -393,6 +411,70 @@ export class CanvasController {
         });
       }
 
+      // Children rendering target
+      let renderTarget = el;
+      if (node.classes && node.classes.includes('cwb-slider')) {
+        const wrapper = doc.createElement('div');
+        wrapper.className = 'cwb-slides-wrapper';
+        el.appendChild(wrapper);
+        renderTarget = wrapper;
+
+        // Visual controls (arrows & dots) in editor mode
+        const nav = node.attributes['data-navigation'] || 'both';
+        const showArrows = nav === 'both' || nav === 'arrows';
+        const showDots = nav === 'both' || nav === 'dots';
+
+        if (showArrows) {
+          const prevBtn = doc.createElement('button');
+          prevBtn.className = 'cwb-slider-arrow prev';
+          prevBtn.innerHTML = '&#10094;';
+          prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const slides = node.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+            if (slides.length > 0) {
+              let idx = parseInt(node.attributes['data-active-index'] || '0', 10);
+              idx = (idx - 1 + slides.length) % slides.length;
+              state.updateAttribute('data-active-index', idx.toString(), node.id);
+            }
+          });
+          el.appendChild(prevBtn);
+
+          const nextBtn = doc.createElement('button');
+          nextBtn.className = 'cwb-slider-arrow next';
+          nextBtn.innerHTML = '&#10095;';
+          nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const slides = node.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+            if (slides.length > 0) {
+              let idx = parseInt(node.attributes['data-active-index'] || '0', 10);
+              idx = (idx + 1) % slides.length;
+              state.updateAttribute('data-active-index', idx.toString(), node.id);
+            }
+          });
+          el.appendChild(nextBtn);
+        }
+
+        if (showDots) {
+          const dotsContainer = doc.createElement('div');
+          dotsContainer.className = 'cwb-slider-dots';
+          const slides = node.children.filter(c => c.classes && c.classes.includes('cwb-slide'));
+          const activeIdx = parseInt(node.attributes['data-active-index'] || '0', 10);
+          slides.forEach((slide, i) => {
+            const dot = doc.createElement('span');
+            dot.className = `cwb-slider-dot${i === activeIdx ? ' active' : ''}`;
+            dot.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              state.updateAttribute('data-active-index', i.toString(), node.id);
+            });
+            dotsContainer.appendChild(dot);
+          });
+          el.appendChild(dotsContainer);
+        }
+      }
+
       // Children
       if (node.children && node.children.length > 0) {
         node.children.forEach(child => {
@@ -403,12 +485,12 @@ export class CanvasController {
                 const childClone = JSON.parse(JSON.stringify(child));
                 delete childClone.loopSource;
                 rewriteBindings(childClone, child.loopSource, index);
-                el.appendChild(renderNode(childClone));
+                renderTarget.appendChild(renderNode(childClone, node));
               });
               return;
             }
           }
-          el.appendChild(renderNode(child));
+          renderTarget.appendChild(renderNode(child, node));
         });
       }
 
@@ -425,12 +507,12 @@ export class CanvasController {
               const childClone = JSON.parse(JSON.stringify(child));
               delete childClone.loopSource;
               rewriteBindings(childClone, child.loopSource, index);
-              rootContainer.appendChild(renderNode(childClone));
+              rootContainer.appendChild(renderNode(childClone, state.doc.tree));
             });
             return;
           }
         }
-        rootContainer.appendChild(renderNode(child));
+        rootContainer.appendChild(renderNode(child, state.doc.tree));
       });
     }
 
@@ -515,6 +597,86 @@ export class CanvasController {
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 91, 255, 0); }
       }
       
+      /* Slider Component Structural Styles */
+      .cwb-slider {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+      .cwb-slides-wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s ease-in-out;
+      }
+      .cwb-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      .cwb-slide.active {
+        display: flex !important;
+      }
+      .cwb-slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s, opacity 0.2s;
+        z-index: 10;
+        outline: none;
+      }
+      .cwb-slider-arrow:hover {
+        background: rgba(0, 0, 0, 0.7);
+      }
+      .cwb-slider-arrow.prev {
+        left: 20px;
+      }
+      .cwb-slider-arrow.next {
+        right: 20px;
+      }
+      .cwb-slider-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+      }
+      .cwb-slider-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+      }
+      .cwb-slider-dot:hover {
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(1.2);
+      }
+      .cwb-slider-dot.active {
+        background: #ffffff;
+        transform: scale(1.2);
+      }
     `;
 
     if (!state.previewMode) {
